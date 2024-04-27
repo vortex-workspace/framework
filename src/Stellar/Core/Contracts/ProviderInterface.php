@@ -2,6 +2,6 @@
 
 namespace Stellar\Core\Contracts;
 
-interface AdapterInterface
+interface ProviderInterface
 {
 }
