@@ -9,8 +9,8 @@ enum SettingKey: string
     case APP_DEFAULT_DATE_FORMAT = 'app.default_date_format';
     case APP_DEFAULT_DATE_TIME_FORMAT = 'app.default_date_time_format';
     case APP_PRELOAD_SETTINGS = 'app.preload_settings';
-    case APP_DEFAULT_REQUEST = 'app.default_request';
     case APP_PROVIDERS = 'app.providers';
+    case APP_GATEWAYS = 'app.gateways';
     case COSMO_STYLES = 'cosmo.styles';
     case INTERNALS = 'internals';
     case INTERNALS_LANGUAGES = 'internals.languages';
