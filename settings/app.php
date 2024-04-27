@@ -16,8 +16,11 @@ return [
      */
     'default_date_format' => 'Y-m-d',
     'default_date_time_format' => 'Y-m-d h:i:s',
-    'default_request' => \Stellar\Vortex\Request::class,
     'providers' => [
         \Stellar\Vortex\Providers\VortexCore::class
     ],
+    /**
+     * List all Gateways that need overwrite in application
+     */
+    'gateways' => [],
 ];

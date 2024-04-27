@@ -4,6 +4,7 @@ namespace Stellar\Vortex;
 
 use Stellar\Core\Contracts\ProviderInterface;
 use Stellar\Core\Contracts\CommandInterface;
+use Stellar\Core\Contracts\RequestInterface;
 use Stellar\Vortex\Boot\Application;
 
 abstract class Provider implements ProviderInterface
@@ -21,9 +22,18 @@ abstract class Provider implements ProviderInterface
         return [];
     }
 
-    public static function boot(Request $request, Application &$application): void
+    public static function boot(RequestInterface $request, Application &$application): void
     {
 
+    }
+
+    /**
+     * Store local Gateways that run only inside Provider Boot
+     * @return array
+     */
+    public static function localGateways(): array
+    {
+        return [];
     }
 
     /**
@@ -35,16 +45,16 @@ abstract class Provider implements ProviderInterface
         return [];
     }
 
-    public static function canBoot(Request $request, Application &$application): bool
+    public static function canBoot(RequestInterface $request, Application &$application): bool
     {
         return true;
     }
 
-    public static function afterBoot(Request $request, Application &$application): void
+    public static function afterBoot(RequestInterface $request, Application &$application): void
     {
     }
 
-    public static function afterNotBoot(Request $request, Application &$application): void
+    public static function afterNotBoot(RequestInterface $request, Application &$application): void
     {
     }
 }

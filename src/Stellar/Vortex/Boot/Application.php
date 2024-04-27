@@ -5,9 +5,10 @@ namespace Stellar\Vortex\Boot;
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
 use Stellar\Core\Contracts\Boot\ApplicationInterface;
-use Stellar\Core\Contracts\RequestInterface;
-use Stellar\Vortex\Provider;
-use Stellar\Vortex\Boot\Application\InvalidProvider;
+use Stellar\Core\Contracts\Boot\GatewayInterface;
+use Stellar\Vortex\Boot\Application\Exceptions\InvalidGateway;
+use Stellar\Vortex\Boot\Application\Exceptions\InvalidProvider;
+use Stellar\Vortex\Boot\Application\Traits\Providers;
 use Stellar\Vortex\Helpers\ArrayTool;
 use Stellar\Vortex\Navigation\Directory;
 use Stellar\Vortex\Navigation\Enums\ProjectPath;
@@ -22,9 +23,11 @@ use Stellar\Vortex\Settings\Setting;
 
 final class Application implements ApplicationInterface
 {
-    private RequestInterface $request;
+    use Providers;
+
     private static Application $instance;
     private array $commands = [];
+    private array $gateways = [];
 
     private function __construct()
     {
@@ -43,6 +46,7 @@ final class Application implements ApplicationInterface
      * @param string $root_path
      * @param string|null $framework_path
      * @return void
+     * @throws InvalidGateway
      * @throws InvalidProvider
      * @throws InvalidSettingException
      * @throws PrefixIsEnabledButNotFound
@@ -55,10 +59,28 @@ final class Application implements ApplicationInterface
             ->setRootPaths($root_path, $framework_path)
             ->setOSSeparator()
             ->tryLoadEnvironment()
-            ->defineRequest()
+            ->discoverGateways()
             ->loadProviders()
             ->loadApplicationRoutes()
             ->closeRoutesDoor();
+    }
+
+    /**
+     * @return Application
+     * @throws InvalidGateway
+     * @throws InvalidSettingException
+     */
+    private function discoverGateways(): Application
+    {
+        foreach (Setting::get(SettingKey::APP_GATEWAYS->value) as $gateway) {
+            if (!((new $gateway) instanceof GatewayInterface)) {
+                throw new InvalidGateway($gateway);
+            }
+
+            $this->gateways[$gateway::baseInterface()] = $gateway;
+        }
+
+        return $this;
     }
 
     private function setRootPaths(string $root_path, ?string $framework_path): Application
@@ -70,17 +92,6 @@ final class Application implements ApplicationInterface
         }
 
         define('FRAMEWORK_PATH', $framework_path);
-
-        return $this;
-    }
-
-    /**
-     * @return Application
-     * @throws InvalidSettingException
-     */
-    private function defineRequest(): Application
-    {
-        $this->request = new (Setting::get(SettingKey::APP_DEFAULT_REQUEST->value));
 
         return $this;
     }
@@ -128,40 +139,6 @@ final class Application implements ApplicationInterface
         return $this;
     }
 
-    /**
-     * @return Application
-     * @throws InvalidProvider
-     * @throws InvalidSettingException
-     */
-    private function loadProviders(): Application
-    {
-        foreach (Setting::get(SettingKey::APP_PROVIDERS->value) as $provider) {
-            if (!(($provider = (new $provider)) instanceof Provider)) {
-                throw new InvalidProvider($provider);
-            }
-
-            foreach ($provider::settings() as $setting) {
-                Setting::uploadFileSetting($setting);
-            }
-
-            // Call provider routes to register routes in Router singleton.
-            $provider::routes();
-
-            $this->appendCommands($provider::commands());
-
-            if ($provider->canBoot($this->request, $this)) {
-                $provider::boot($this->request, $this);
-                $provider::afterBoot($this->request, $this);
-
-                continue;
-            }
-
-            $provider::afterNotBoot($this->request, $this);
-        }
-
-        return $this;
-    }
-
     private function appendCommands(array $commands): void
     {
         $this->commands = array_merge($this->commands, $commands);
@@ -186,8 +163,12 @@ final class Application implements ApplicationInterface
         return $this->commands;
     }
 
-    public function getRequest(): RequestInterface
+    public function getGatewayByInterface(string $interface): ?string
     {
-        return $this->request;
+        if (!isset($this->gateways[$interface])) {
+            return null;
+        }
+
+        return $this->gateways[$interface]::customClass();
     }
 }
