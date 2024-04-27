@@ -1,11 +1,11 @@
 <?php
 
-namespace Stellar\Vortex\Adapters;
+namespace Stellar\Vortex\Providers;
 
-use Stellar\Vortex\Adapter;
+use Stellar\Vortex\Provider;
 use Stellar\Vortex\Cosmo\Commands\RouteList;
 
-class VortexCore extends Adapter
+class VortexCore extends Provider
 {
     public static function commands(): array
     {

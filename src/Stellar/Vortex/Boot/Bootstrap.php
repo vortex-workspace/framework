@@ -15,7 +15,7 @@ abstract class Bootstrap implements BootstrapInterface
     /**
      * @param string $root_path
      * @return void
-     * @throws \Stellar\Vortex\Boot\Application\InvalidAdapter
+     * @throws \Stellar\Vortex\Boot\Application\InvalidProvider
      * @throws InvalidSettingException
      * @throws PathNotFoundException
      * @throws PrefixIsEnabledButNotFound

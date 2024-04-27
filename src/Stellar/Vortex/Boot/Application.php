@@ -6,8 +6,8 @@ use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
 use Stellar\Core\Contracts\Boot\ApplicationInterface;
 use Stellar\Core\Contracts\RequestInterface;
-use Stellar\Vortex\Adapter;
-use Stellar\Vortex\Boot\Application\InvalidAdapter;
+use Stellar\Vortex\Provider;
+use Stellar\Vortex\Boot\Application\InvalidProvider;
 use Stellar\Vortex\Helpers\ArrayTool;
 use Stellar\Vortex\Navigation\Directory;
 use Stellar\Vortex\Navigation\Enums\ProjectPath;
@@ -43,9 +43,8 @@ final class Application implements ApplicationInterface
      * @param string $root_path
      * @param string|null $framework_path
      * @return void
-     * @throws InvalidAdapter
+     * @throws InvalidProvider
      * @throws InvalidSettingException
-     * @throws PathNotFoundException
      * @throws PrefixIsEnabledButNotFound
      * @throws RouteNameAlreadyInUse
      * @throws TypeNotMatchException
@@ -53,17 +52,16 @@ final class Application implements ApplicationInterface
     public static function build(string $root_path, ?string $framework_path = null): void
     {
         self::getInstance()
-            ->defineProjectAndFrameworkRoot($root_path, $framework_path)
-            ->setMachineOSPathSeparator()
+            ->setRootPaths($root_path, $framework_path)
+            ->setOSSeparator()
             ->tryLoadEnvironment()
-            ->loadSettings()
             ->defineRequest()
-            ->loadAdapters()
+            ->loadProviders()
             ->loadApplicationRoutes()
             ->closeRoutesDoor();
     }
 
-    private function defineProjectAndFrameworkRoot(string $root_path, ?string $framework_path): Application
+    private function setRootPaths(string $root_path, ?string $framework_path): Application
     {
         define('ROOT_PATH', $root_path);
 
@@ -92,21 +90,6 @@ final class Application implements ApplicationInterface
         try {
             Dotenv::createImmutable(ProjectPath::Environment->value)->load();
         } catch (InvalidPathException) {
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return static
-     * @throws PathNotFoundException
-     * @throws TypeNotMatchException
-     * @throws InvalidSettingException
-     */
-    private function loadSettings(): Application
-    {
-        if (Setting::get(SettingKey::APP_PRELOAD_SETTINGS->value, false)) {
-            Setting::loadAllSettings();
         }
 
         return $this;
@@ -147,33 +130,33 @@ final class Application implements ApplicationInterface
 
     /**
      * @return Application
-     * @throws InvalidAdapter
+     * @throws InvalidProvider
      * @throws InvalidSettingException
      */
-    private function loadAdapters(): Application
+    private function loadProviders(): Application
     {
-        foreach (Setting::get(SettingKey::APP_ADAPTERS->value) as $adapter) {
-            if (!(($adapter = (new $adapter)) instanceof Adapter)) {
-                throw new InvalidAdapter($adapter);
+        foreach (Setting::get(SettingKey::APP_PROVIDERS->value) as $provider) {
+            if (!(($provider = (new $provider)) instanceof Provider)) {
+                throw new InvalidProvider($provider);
             }
 
-            foreach ($adapter::settings() as $setting) {
+            foreach ($provider::settings() as $setting) {
                 Setting::uploadFileSetting($setting);
             }
 
-            // Call adapter routes to register routes in Router singleton.
-            $adapter::routes();
+            // Call provider routes to register routes in Router singleton.
+            $provider::routes();
 
-            $this->appendCommands($adapter::commands());
+            $this->appendCommands($provider::commands());
 
-            if ($adapter->canBoot($this->request, $this)) {
-                $adapter::boot($this->request, $this);
-                $adapter::afterBoot($this->request, $this);
+            if ($provider->canBoot($this->request, $this)) {
+                $provider::boot($this->request, $this);
+                $provider::afterBoot($this->request, $this);
 
                 continue;
             }
 
-            $adapter::afterNotBoot($this->request, $this);
+            $provider::afterNotBoot($this->request, $this);
         }
 
         return $this;
@@ -189,7 +172,7 @@ final class Application implements ApplicationInterface
         Router::getInstance()->disableEntrance();
     }
 
-    private function setMachineOSPathSeparator(): Application
+    private function setOSSeparator(): Application
     {
         if (!defined('OS_SEPARATOR')) {
             define('OS_SEPARATOR', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? '\\' : '/');

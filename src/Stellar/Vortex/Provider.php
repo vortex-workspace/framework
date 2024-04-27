@@ -2,11 +2,11 @@
 
 namespace Stellar\Vortex;
 
-use Stellar\Core\Contracts\AdapterInterface;
+use Stellar\Core\Contracts\ProviderInterface;
 use Stellar\Core\Contracts\CommandInterface;
 use Stellar\Vortex\Boot\Application;
 
-abstract class Adapter implements AdapterInterface
+abstract class Provider implements ProviderInterface
 {
     /**
      * @return class-string<CommandInterface>[]

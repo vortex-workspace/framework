@@ -16,16 +16,8 @@ return [
      */
     'default_date_format' => 'Y-m-d',
     'default_date_time_format' => 'Y-m-d h:i:s',
-
-    /**
-     * Enable application to preload all settings, this is not cache.
-     * 'preload_settings' => bool
-     * true - Application will preload all settings,
-     * false - Application will load settings on demand
-     */
-    'preload_settings' => false,
     'default_request' => \Stellar\Vortex\Request::class,
-    'adapters' => [
-        \Stellar\Vortex\Adapters\VortexCore::class
+    'providers' => [
+        \Stellar\Vortex\Providers\VortexCore::class
     ],
 ];
