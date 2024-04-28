@@ -1,4 +1,6 @@
 ## Summary
+- [Gateway](#Gateway)
+- [Provider](#Provider)
 - [Cosmo](#Cosmo)
   - [Command](#Command)
     - [Permissions](#Permissions)
@@ -10,6 +12,48 @@
     - [Bells](#Bells)
 - [Request](#Request)
 
+## Gateway
+If you need to override internal framework classes, you can create custom Gateways, and Vortex will utilize our class 
+within the application. To set up our Gateways, configure them in the `app.gateways` setting as shown below:
+
+```php
+<?php
+// Settings/app.php
+
+return [
+    'gateways' => [
+        CustomGateway::class,
+    ],
+];
+```
+
+**Warning**: If you configure multiple Gateways for the same Interface, the last one provided will be used.
+
+### Gateway class
+Gateways are straightforward classes that establish mappings between base interfaces and custom classes requiring 
+customized functionalities. To create a `Gateway`, simply define two static methods: `baseInterface()`, which specifies 
+the base interface for our custom class, and `customClass()`, which refers to our customized class.
+
+```php
+<?php
+
+use Stellar\Core\Contracts\RequestInterface;use Stellar\Gateway;
+
+class RequestGateway extends Gateway
+{
+    public static function baseInterface(): string
+    {
+        return RequestInterface::class;
+    }
+    
+    public static function customClass(): string
+    {
+        return CustomRequest::class;
+    }
+}
+``` 
+
+## Provider
 
 ## Cosmo
 
@@ -30,8 +74,7 @@ of type ``CommandReturnStatus``.
 ```php
 <?php
 
-use Stellar\Core\Cosmo\Console\Enums\CommandReturnStatus;
-use Stellar\Vortex\Cosmo\Command; 
+use Stellar\Core\Cosmo\Console\Enums\CommandReturnStatus;use Stellar\Cosmo\Command; 
       
 class ProjectInstall extends Command  
 {  
@@ -60,8 +103,7 @@ the Application class as a parameter, as in the example below. This method shoul
 ```php
 <?php
 
-use Stellar\Vortex\Cosmo\Argument;  
-use Stellar\Vortex\Cosmo\Command;  
+use Stellar\Cosmo\Command;  
       
 class ProjectInstall extends Command  
 {  
@@ -81,8 +123,7 @@ block visibility, allowing the command to be executed but not listed.
 ```php
 <?php
 
-use Stellar\Vortex\Cosmo\Argument;  
-use Stellar\Vortex\Cosmo\Command;  
+use Stellar\Cosmo\Command;  
       
 class ProjectInstall extends Command  
 {  
@@ -101,8 +142,7 @@ structure and functionality are similar to earlier methods.
 ```php
 <?php
 
-use Stellar\Vortex\Cosmo\Argument;  
-use Stellar\Vortex\Cosmo\Command;  
+use Stellar\Cosmo\Command;  
       
 class ProjectInstall extends Command  
 {  
@@ -121,8 +161,7 @@ need return an array of Arguments objects.
 ```php
 <?php
 
-use Stellar\Vortex\Cosmo\Argument;  
-use Stellar\Vortex\Cosmo\Command;  
+use Stellar\Cosmo\Argument;use Stellar\Cosmo\Command;  
       
 class ProjectInstall extends Command  
 {  
@@ -143,8 +182,7 @@ array of Options objects.
 ```php
 <?php
 
-use Stellar\Vortex\Cosmo\Option;  
-use Stellar\Vortex\Cosmo\Command;  
+use Stellar\Cosmo\Command;use Stellar\Cosmo\Option;  
       
 class ProjectInstall extends Command  
 {  
@@ -167,8 +205,7 @@ runtime in the end of command, just set the method ``withRuntime()`` to return t
 ```php
 <?php
 
-use Stellar\Vortex\Cosmo\Option;  
-use Stellar\Vortex\Cosmo\Command;  
+use Stellar\Cosmo\Command;  
       
 class ProjectInstall extends Command  
 {  
@@ -187,8 +224,7 @@ below:
 ```php
 <?php
 
-use Stellar\Vortex\Cosmo\Command;  
-use Stellar\Core\Cosmo\Console\Enums\CommandReturnStatus;
+use Stellar\Core\Cosmo\Console\Enums\CommandReturnStatus;use Stellar\Cosmo\Command;
       
 class ProjectInstall extends Command  
 {  
@@ -207,17 +243,8 @@ class ProjectInstall extends Command
 Classes Request are responsible for grouping and abstracting the data and information necessary in a request, such as 
 ``HTTP`` method, data from a ``POST`` form, query parameters from a ``GET`` request, among others. Additionally, it also 
 allows for validating these data, using ``Validations`` and ``Rules``. It is possible to extend the Request class and 
-define a customized class to be used in the application, by placing our string namespace in the setting 
-``app/default_request``. This must necessarily be an extension of the Request class.
-
-```php
-<?php
-
-// settings/app.php
-return [
-    'default_request' => \Stellar\Vortex\Request::class,
-];
-```
+define a customized class to be used in the application, by adding in the `app.gateways` setting, for more about this 
+look to [Gateway](#gateway) section.
 
 ### Validations
 
@@ -231,9 +258,7 @@ sub-rules separated by `"."`.
 ```php
 <?php
 
-use Stellar\Vortex\Request\Validations\Rules\EmailRule;
-use Stellar\Vortex\Request\Validations\Rules\RequiredRule;
-use Stellar\Vortex\Request\Validations\Rules\StringRule;
+use Stellar\Request\Validations\Rules\EmailRule;use Stellar\Request\Validations\Rules\RequiredRule;use Stellar\Request\Validations\Rules\StringRule;
 
 $rules = [
     'name' => StringRule::make()->max(125)->min(10),
@@ -260,9 +285,7 @@ and pass the Validation class that should be used.
 ```php
 <?php
 
-use Stellar\Vortex\Request\Validations\Rules\EmailRule;
-use Stellar\Vortex\Request\Validations\Rules\RequiredRule;
-use Stellar\Vortex\Request\Validations\Rules\StringRule;
+use Stellar\Request\Validations\Rules\EmailRule;use Stellar\Request\Validations\Rules\RequiredRule;use Stellar\Request\Validations\Rules\StringRule;
 
 $rules = [
     'name' => StringRule::make()->max(125)->min(10),
@@ -291,9 +314,7 @@ class as a parameter and must return a boolean.
 ```php
 <?php
 
-use Stellar\Vortex\Request\Validation;
-use Stellar\Vortex\Request\Validations\Rules\StringRule;
-use Stellar\Vortex\Request\Validations\Rules\RequiredRule;
+use Stellar\Request\Validation;use Stellar\Request\Validations\Rules\RequiredRule;use Stellar\Request\Validations\Rules\StringRule;
 
 class CustomValidation extends Validation
 {
@@ -335,8 +356,7 @@ that can be used to complete feedback messages with method `customAttributes()`.
 
 namespace Stellar\Vortex\Request\Validations\Rules;
 
-use Stellar\Vortex\Request;
-use Stellar\Vortex\Request\Validations\Rule;
+use Stellar\Request;use Stellar\Request\Validations\Rule;
 
 class EmailRule extends Rule
 {

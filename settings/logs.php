@@ -1,7 +1,7 @@
 <?php
 
-use Stellar\Vortex\Facades\Log\Enum\LogFileFormat;
-use Stellar\Vortex\Facades\Log\Enum\LogHandler;
+use Stellar\Facades\Log\Enum\LogFileFormat;
+use Stellar\Facades\Log\Enum\LogHandler;
 
 return [
     /**

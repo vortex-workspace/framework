@@ -1,5 +1,5 @@
 {
-  "name": "vortex-framework/vortex-framework",
+  "name": "vortex-workspace/vortex-framework",
   "description": "",
   "minimum-stability": "stable",
   "license": "MIT",
@@ -15,35 +15,47 @@
   ],
   "require": {
     "php": "^8.3",
-    "symfony/var-dumper": "^7.0",
-    "symfony/console": "^7.0",
-    "doctrine/inflector": "^2.0",
-    "ramsey/uuid": "^4.7",
-    "spatie/regex": "^3.1",
-    "robinvdvleuten/ulid": "^5.0",
-    "monolog/monolog": "^3.5",
-    "nesbot/carbon": "^2.72",
     "ext-ctype": "*",
     "ext-intl": "*",
-    "ext-openssl": "*",
     "ext-libxml": "*",
+    "ext-openssl": "*",
     "ext-simplexml": "*",
+    "doctrine/inflector": "^2.0",
+    "monolog/monolog": "^3.5",
+    "nesbot/carbon": "^2.72",
+    "ramsey/uuid": "^4.7",
+    "robinvdvleuten/ulid": "^5.0",
+    "spatie/ignition": "^1.13",
+    "spatie/regex": "^3.1",
+    "symfony/console": "^7.0",
+    "symfony/var-dumper": "^7.0",
     "vlucas/phpdotenv": "^5.6",
-    "spatie/ignition": "^1.13"
+    "vortex-workspace/cosmo": "dev-master"
   },
   "require-dev": {
-    "phpunit/phpunit": "^10.5",
-    "fakerphp/faker": "^1.23"
+    "composer/composer": "*",
+    "fakerphp/faker": "^1.23",
+    "phpunit/phpunit": "^10.5"
   },
   "autoload": {
     "psr-4": {
-      "Stellar\\": "src/Stellar/",
-      "Cosmo\\": "src/Stellar/Core/Cosmo/"
+      "Core\\": "src/Core/",
+      "Stellar\\": "src/Stellar/"
     }
   },
   "autoload-dev": {
     "psr-4": {
       "Stellar\\Tests\\": "tests/"
     }
+  },
+  "scripts": {
+    "post-package-install": [
+      "Stellar\\Composer\\Package::discover"
+    ]
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
   }
 }

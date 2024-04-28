@@ -1,6 +1,6 @@
 <?php
 
-use Stellar\Vortex\Languages\Enum\Language;
+use Stellar\Languages\Enum\Language;
 
 return [
     /**
@@ -17,7 +17,7 @@ return [
     'default_date_format' => 'Y-m-d',
     'default_date_time_format' => 'Y-m-d h:i:s',
     'providers' => [
-        \Stellar\Vortex\Providers\VortexCore::class
+        \Stellar\Providers\VortexCore::class
     ],
     /**
      * List all Gateways that need overwrite in application
