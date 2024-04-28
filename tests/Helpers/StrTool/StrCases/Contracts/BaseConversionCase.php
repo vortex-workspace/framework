@@ -5,7 +5,7 @@ namespace Stellar\Tests\Helpers\StrTool\StrCases\Contracts;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use PHPUnit\Framework\TestCase;
-use Stellar\Vortex\Helpers\StrTool;
+use Stellar\Helpers\StrTool;
 
 abstract class BaseConversionCase extends TestCase
 {

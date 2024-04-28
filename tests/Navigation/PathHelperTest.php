@@ -3,7 +3,7 @@
 namespace Stellar\Tests\Navigation;
 
 use PHPUnit\Framework\TestCase;
-use Stellar\Vortex\Navigation\Helpers\Path;
+use Stellar\Navigation\Helpers\Path;
 
 class PathHelperTest extends TestCase
 {

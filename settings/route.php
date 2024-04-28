@@ -41,9 +41,9 @@ return [
             'use_prefix' => true,
             'prefix' => 'aaa',
         ],
-        'ecommerce' => [
-            'use_prefix' => false,
-            'prefix' => 'eco',
-        ]
+//        'ecommerce' => [
+//            'use_prefix' => false,
+//            'prefix' => 'eco',
+//        ]
     ]
 ];

@@ -3,7 +3,7 @@
 namespace Stellar\Tests\Helpers\StrTool;
 
 use PHPUnit\Framework\TestCase;
-use Stellar\Vortex\Helpers\StrTool;
+use Stellar\Helpers\StrTool;
 
 class BooleanConditionalsTest extends TestCase
 {
