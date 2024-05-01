@@ -106,4 +106,19 @@ class Path
 
         return is_file($path);
     }
+
+    /**
+     * @param string $path
+     * @param bool $is_real_path
+     * @return bool
+     * @throws PathNotFound
+     */
+    public static function isSymlink(string $path, bool $is_real_path = false): bool
+    {
+        if (!$is_real_path) {
+            $path = Symlink::realPath($path);
+        }
+
+        return is_link($path);
+    }
 }
