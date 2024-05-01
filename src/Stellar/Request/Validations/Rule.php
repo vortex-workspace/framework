@@ -2,7 +2,7 @@
 
 namespace Stellar\Request\Validations;
 
-use Stellar\Core\Contracts\Request\Validation\RuleInterface;
+use Core\Contracts\Request\Validation\RuleInterface;
 use Stellar\Request;
 
 abstract class Rule implements RuleInterface

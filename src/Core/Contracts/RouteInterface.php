@@ -1,6 +1,6 @@
 <?php
 
-namespace Stellar\Core\Contracts;
+namespace Core\Contracts;
 
 interface RouteInterface
 {

@@ -2,11 +2,10 @@
 
 namespace Stellar;
 
-use;
 use Stellar\Boot\Application;
-use Stellar\Core\Contracts\CommandInterface;
-use Stellar\Core\Contracts\ProviderInterface;
-use Stellar\Core\Contracts\RequestInterface;
+use Core\Contracts\CommandInterface;
+use Core\Contracts\ProviderInterface;
+use Core\Contracts\RequestInterface;
 
 abstract class Provider implements ProviderInterface
 {

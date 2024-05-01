@@ -1,6 +1,6 @@
 <?php
 
-namespace Stellar\Core\Contracts\Boot;
+namespace Core\Contracts\Boot;
 
 interface ApplicationInterface
 {

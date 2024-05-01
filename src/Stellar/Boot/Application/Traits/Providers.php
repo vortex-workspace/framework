@@ -5,11 +5,11 @@ namespace Stellar\Boot\Application\Traits;
 use Stellar\Adapters\RequestAdapter;
 use Stellar\Boot\Application;
 use Stellar\Boot\Application\Exceptions\InvalidProvider;
-use Stellar\Core\Contracts\RequestInterface;
+use Core\Contracts\RequestInterface;
 use Stellar\Provider;
+use Stellar\Setting;
 use Stellar\Settings\Enum\SettingKey;
 use Stellar\Settings\Exceptions\InvalidSettingException;
-use Stellar\Settings\Setting;
 
 trait Providers
 {
@@ -40,7 +40,7 @@ trait Providers
             $this->loadProviderSettings($provider);
             $provider::routes();
             $this->appendCommands($provider::commands());
-            $this->bootProvider(RequestAdapter::getMatchClassObject(gateways: $gateways), new $provider);
+            $this->bootProvider(RequestAdapter::getMatchClassObjectForProvider(gateways: $gateways), new $provider);
         }
 
         return $this;
