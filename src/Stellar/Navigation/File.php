@@ -3,65 +3,23 @@
 namespace Stellar\Navigation;
 
 use Stellar\Helpers\StrTool;
+use Stellar\Navigation\Directory\Exceptions\FailedOnCreateDirectory;
+use Stellar\Navigation\File\Exceptions\FailedOnCopyFile;
 use Stellar\Navigation\File\Exceptions\FailedOnDeleteFile;
+use Stellar\Navigation\File\Exceptions\FailedOnGetFileContent;
 use Stellar\Navigation\File\Exceptions\FailedOnMoveFile;
-use Stellar\Navigation\File\Exceptions\FailedOnRenameFile;
-use Stellar\Navigation\File\Exceptions\FileAlreadyExists;
+use Stellar\Navigation\File\Exceptions\TryCopyFileButAlreadyExists;
+use Stellar\Navigation\File\Traits\Create;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
-use Stellar\Navigation\Pointer\Enums\OpenMode;
-use Stellar\Navigation\Pointer\Exceptions\FailedToClosePointer;
-use Stellar\Navigation\Pointer\Exceptions\FailedToOpenFilePointer;
-use Stellar\Navigation\Pointer\Exceptions\TryCloseNonOpenedPointer;
+use Stellar\Navigation\Stream\Enums\OpenMode;
+use Stellar\Navigation\Stream\Exceptions\FailedToOpenStream;
+use Stellar\Navigation\Stream\Exceptions\FailedToWriteFromStream;
+use Stellar\Navigation\Stream\Exceptions\MissingOpenedStream;
+
 
 class File extends Path
 {
-    /**
-     * @param string $filename
-     * @param string $directory_path
-     * @param bool $is_real_path
-     * @param bool $force
-     * @param OpenMode $mode
-     * @param bool $exception_mode
-     * @return bool
-     * @throws FailedOnDeleteFile
-     * @throws FailedToClosePointer
-     * @throws FailedToOpenFilePointer
-     * @throws FileAlreadyExists
-     * @throws PathNotFound
-     * @throws TryCloseNonOpenedPointer
-     */
-    public static function create(
-        string   $filename,
-        string   $directory_path,
-        bool     $is_real_path = false,
-        bool     $force = false,
-        OpenMode $mode = OpenMode::X_PLUS_MODE,
-        bool     $exception_mode = true
-    ): bool
-    {
-        if (!$is_real_path) {
-            $directory_path = static::realPath($directory_path);
-        }
-
-        if (Path::exist($full_path = "$directory_path/$filename")) {
-            if ($force === false) {
-                throw new FileAlreadyExists($full_path);
-            }
-
-            self::delete($full_path);
-        }
-
-        $pointer = Pointer::make($full_path, $mode);
-
-        if ($exception_mode) {
-            $pointer->tryOpen();
-            $pointer->tryClose();
-
-            return true;
-        }
-
-        return $pointer->open() && $pointer->close();
-    }
+    use Create;
 
     /**
      * @param string $file_path
@@ -89,6 +47,7 @@ class File extends Path
      * @param bool $is_real_path
      * @param bool $recursive
      * @return bool
+     * @throws Directory\Exceptions\FailedOnCreateDirectory
      * @throws FailedOnMoveFile
      * @throws PathNotFound
      */
@@ -122,27 +81,158 @@ class File extends Path
 
     /**
      * @param string $file_path
-     * @param string $final_filename
+     * @param string $final_directory
+     * @param string|null $custom_filename
      * @param bool $is_real_path
+     * @param bool $recursive
+     * @param bool $overwrite_where_exists
      * @return bool
-     * @throws FailedOnRenameFile
+     * @throws FailedOnCopyFile
+     * @throws FailedOnCreateDirectory
+     * @throws PathNotFound
+     * @throws TryCopyFileButAlreadyExists
+     */
+    public static function copy(
+        string  $file_path,
+        string  $final_directory,
+        ?string $custom_filename = null,
+        bool    $is_real_path = false,
+        bool    $recursive = false,
+        bool    $overwrite_where_exists = false
+    ): bool
+    {
+        if (!$is_real_path) {
+            $file_path = static::realPath($file_path);
+            $final_directory = static::realPath($final_directory);
+        }
+
+        if (!self::exist($file_path)) {
+            throw new PathNotFound($file_path);
+        }
+
+        $final_path = StrTool::forceFinishWith($final_directory, '/') . ($custom_filename === null ?
+                basename($file_path) :
+                StrTool::removeIfStartAndFinishWith($custom_filename, '/'));
+
+        if (self::exist($final_path) && $overwrite_where_exists === false) {
+            throw new TryCopyFileButAlreadyExists($file_path, $final_path);
+        }
+
+        if (!self::exist($final_directory)) {
+            if ($recursive === false) {
+                throw new PathNotFound($final_directory);
+            }
+
+            Directory::create($final_directory, true, true);
+        }
+
+        if (copy($file_path, $final_path) === false) {
+            throw new FailedOnCopyFile($file_path, $final_path);
+        }
+
+        return true;
+    }
+
+    /**
+     * @param string $file_path
+     * @param bool $is_real_path
+     * @param bool $use_include_path
+     * @param int $offset
+     * @param int|null $length
+     * @return string
+     * @throws FailedOnGetFileContent
      * @throws PathNotFound
      */
-    public static function rename(string $file_path, string $final_filename, bool $is_real_path = false): bool
+    public static function get(
+        string $file_path,
+        bool   $is_real_path,
+        bool   $use_include_path = false,
+        int    $offset = 0,
+        ?int   $length = null
+    ): string
     {
         if (!$is_real_path) {
             $file_path = static::realPath($file_path);
         }
 
-        $final_path = StrTool::replace(
-            $file_path,
-            basename($file_path),
-            StrTool::removeIfStartAndFinishWith($final_filename, '/')
-        );
-
-        if (rename($file_path, $final_path) === false) {
-            throw new FailedOnRenameFile($file_path, $final_filename);
+        if (self::notExist($file_path)) {
+            throw new PathNotFound($file_path);
         }
+
+        if (!($content = file_get_contents($file_path, $use_include_path, offset: $offset, length: $length))) {
+            throw new FailedOnGetFileContent($file_path, $offset, $length);
+        }
+
+        return $content;
+    }
+
+    /**
+     * @param string $file_path
+     * @param string $content
+     * @param int|null $length
+     * @param bool $is_real_path
+     * @return bool
+     * @throws FailedOnDeleteFile
+     * @throws FailedToOpenStream
+     * @throws PathNotFound
+     * @throws FailedToWriteFromStream
+     * @throws MissingOpenedStream
+     */
+    public static function update(
+        string $file_path,
+        string $content,
+        ?int   $length = null,
+        bool   $is_real_path = false
+    ): bool
+    {
+        if (!$is_real_path) {
+            $file_path = static::realPath($file_path);
+        }
+
+        if (self::notExist($file_path)) {
+            throw new PathNotFound($file_path);
+        }
+
+        self::delete($file_path);
+
+        Stream::make($file_path, OpenMode::WB_MODE)->open()->write($content, $length);
+
+        return true;
+    }
+
+    /**
+     * @param string $file_path
+     * @param array $replace
+     * @param int|null $limit
+     * @param int|null $length
+     * @param bool $is_real_path
+     * @return true
+     * @throws FailedOnDeleteFile
+     * @throws FailedOnGetFileContent
+     * @throws FailedToOpenStream
+     * @throws FailedToWriteFromStream
+     * @throws MissingOpenedStream
+     * @throws PathNotFound
+     */
+    public static function replace(
+        string $file_path,
+        array  $replace,
+        ?int   $limit = null,
+        ?int   $length = null,
+        bool   $is_real_path = false
+    ): bool
+    {
+        if (!$is_real_path) {
+            $file_path = static::realPath($file_path);
+        }
+
+        $content = self::get($file_path, true);
+
+        foreach ($replace as $old => $new) {
+            $content = StrTool::replace($content, $old, $new, $limit ?? -1);
+        }
+
+        self::update($file_path, $content, $length, true);
 
         return true;
     }

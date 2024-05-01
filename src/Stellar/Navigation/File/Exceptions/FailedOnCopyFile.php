@@ -6,12 +6,12 @@ use Monolog\Level;
 use Stellar\Throwable\Exceptions\Contracts\Exception;
 use Stellar\Throwable\Exceptions\Enum\ExceptionCode;
 
-class FailedOnRenameFile extends Exception
+class FailedOnCopyFile extends Exception
 {
-    public function __construct(public readonly string $path, public readonly string $final_filename)
+    public function __construct(public readonly string $from, public readonly string $to)
     {
         parent::__construct(
-            "Fail on try rename file \"$this->path\" to \"$this->final_filename\".",
+            "Fail on try copy file from \"$this->from\" to \"$this->to\".",
             ExceptionCode::CATCH_EXCEPTION,
             Level::Warning
         );

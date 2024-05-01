@@ -1,6 +1,6 @@
 <?php
 
-namespace Stellar\Navigation\Pointer\Enums;
+namespace Stellar\Navigation\Stream\Enums;
 
 /** https://www.php.net/manual/en/function.fopen.php */
 enum OpenMode: string

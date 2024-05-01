@@ -1,19 +1,19 @@
 <?php
 
-namespace Stellar\Navigation\Pointer\Exceptions;
+namespace Stellar\Navigation\Stream\Exceptions;
 
 use Monolog\Level;
 use Stellar\Throwable\Exceptions\Contracts\Exception;
 use Stellar\Throwable\Exceptions\Enum\ExceptionCode;
 
-class TryCloseNonOpenedPointer extends Exception
+class FailedToOpenStream extends Exception
 {
     public function __construct(public readonly string $path)
     {
         parent::__construct(
-            "Try close non opened pointer for file \"$path\".",
-            ExceptionCode::NON_CATCH_EXCEPTION,
-            Level::Error
+            "Failed to open stream on file \"$this->path\".",
+            ExceptionCode::CATCH_EXCEPTION,
+            Level::Warning
         );
     }
 }
