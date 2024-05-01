@@ -44,6 +44,7 @@
     }
   },
   "autoload-dev": {
+    "files": ["src/Stellar/Alias/main.php"],
     "psr-4": {
       "Stellar\\Tests\\": "tests/"
     }

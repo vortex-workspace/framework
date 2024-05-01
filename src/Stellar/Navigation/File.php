@@ -3,6 +3,7 @@
 namespace Stellar\Navigation;
 
 use Stellar\Helpers\StrTool;
+use Stellar\Navigation\Directory\Exceptions\DirectoryAlreadyExist;
 use Stellar\Navigation\Directory\Exceptions\FailedOnCreateDirectory;
 use Stellar\Navigation\File\Exceptions\FailedOnCopyFile;
 use Stellar\Navigation\File\Exceptions\FailedOnDeleteFile;
@@ -47,7 +48,8 @@ class File extends Path
      * @param bool $is_real_path
      * @param bool $recursive
      * @return bool
-     * @throws Directory\Exceptions\FailedOnCreateDirectory
+     * @throws DirectoryAlreadyExist
+     * @throws FailedOnCreateDirectory
      * @throws FailedOnMoveFile
      * @throws PathNotFound
      */
@@ -87,6 +89,7 @@ class File extends Path
      * @param bool $recursive
      * @param bool $overwrite_where_exists
      * @return bool
+     * @throws DirectoryAlreadyExist
      * @throws FailedOnCopyFile
      * @throws FailedOnCreateDirectory
      * @throws PathNotFound

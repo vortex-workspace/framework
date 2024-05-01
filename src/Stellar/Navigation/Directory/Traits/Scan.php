@@ -25,7 +25,8 @@ trait Scan
         bool         $is_real_path = false,
         bool         $key_as_path = false,
         bool         $return_full_path = false,
-        bool         $exclude_parents = false
+        bool         $exclude_parents = false,
+        bool         $include_root = false
     ): bool|array
     {
         if (!$is_real_path) {
@@ -43,7 +44,11 @@ trait Scan
         }
 
         if ($key_as_path) {
-            return ArrayTool::setKeyEqualValue($directories);
+            $directories = ArrayTool::setKeyEqualValue($directories);
+        }
+
+        if ($include_root) {
+            $directories = [$return_full_path ? $path : basename($path) => $directories];
         }
 
         return $directories;

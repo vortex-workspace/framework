@@ -2,7 +2,9 @@
 
 namespace Stellar\Navigation\File\Traits;
 
+use Stellar\Helpers\StrTool;
 use Stellar\Navigation\File\Exceptions\FailedOnDeleteFile;
+use Stellar\Navigation\File\Exceptions\FailedOnGetFileContent;
 use Stellar\Navigation\File\Exceptions\FileAlreadyExists;
 use Stellar\Navigation\Path;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
@@ -112,6 +114,46 @@ trait Create
         bool   $force = false,
     ): bool
     {
+        return self::createFrom($filename, $directory_path, $is_real_path, $force, $content);
+    }
+
+    /**
+     * @param string $filename
+     * @param string $directory_path
+     * @param string $template_path
+     * @param array $replace
+     * @param int|null $limit
+     * @param bool $is_real_path
+     * @param bool $force
+     * @return bool
+     * @throws FailedOnDeleteFile
+     * @throws FailedToCloseStream
+     * @throws FailedToOpenStream
+     * @throws FailedToWriteFromStream
+     * @throws FileAlreadyExists
+     * @throws MissingOpenedStream
+     * @throws PathNotFound
+     * @throws TryCloseNonOpenedStream
+     * @throws FailedOnGetFileContent
+     */
+    public static function createFromTemplate(
+        string $filename,
+        string $directory_path,
+        string $template_path,
+        array $replace = [],
+        ?int   $limit = null,
+        bool   $is_real_path = false,
+        bool   $force = false,
+    ): bool
+    {
+        $template_path = self::realPath($template_path);
+
+        $content = self::get($template_path, true);
+
+        foreach ($replace as $old => $new) {
+            $content = StrTool::replace($content, $old, $new, $limit ?? -1);
+        }
+
         return self::createFrom($filename, $directory_path, $is_real_path, $force, $content);
     }
 }
