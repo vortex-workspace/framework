@@ -1,6 +1,11 @@
 ## Summary
 - [Gateway](#Gateway)
 - [Provider](#Provider)
+- [Helpers](#Helpers)
+  - [Navigation](#Navigation)
+    - [File](#File)
+    - [Directory](#Directory)
+    - [Symlink](#Symlink)
 - [Cosmo](#Cosmo)
   - [Command](#Command)
     - [Permissions](#Permissions)
@@ -54,6 +59,14 @@ class RequestGateway extends Gateway
 ``` 
 
 ## Provider
+
+## Helpers
+
+### Navigation
+#### File
+
+#### Directory
+#### Symlink
 
 ## Cosmo
 
