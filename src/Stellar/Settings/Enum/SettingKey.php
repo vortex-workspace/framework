@@ -11,7 +11,6 @@ enum SettingKey: string
     case APP_PRELOAD_SETTINGS = 'app.preload_settings';
     case APP_PROVIDERS = 'app.providers';
     case APP_GATEWAYS = 'app.gateways';
-    case COSMO_STYLES = 'cosmo.styles';
     case INTERNALS = 'internals';
     case INTERNALS_LANGUAGES = 'internals.languages';
     case INTERNALS_LANGUAGES_FAKER = 'inflector.languages.faker';

@@ -5,6 +5,7 @@ namespace Stellar\Navigation;
 use Stellar\Helpers\StrTool;
 use Stellar\Navigation\Directory\Exceptions\DirectoryAlreadyExist;
 use Stellar\Navigation\Directory\Exceptions\FailedOnCreateDirectory;
+use Stellar\Navigation\File\Enums\UpdatePosition;
 use Stellar\Navigation\File\Exceptions\FailedOnCopyFile;
 use Stellar\Navigation\File\Exceptions\FailedOnDeleteFile;
 use Stellar\Navigation\File\Exceptions\FailedOnGetFileContent;
@@ -236,6 +237,44 @@ class File extends Path
         }
 
         self::update($file_path, $content, $length, true);
+
+        return true;
+    }
+
+    /**
+     * This will put the new content in the end of file or in the start of file.
+     * @param string $path
+     * @param string $content
+     * @param UpdatePosition $position
+     * @param bool $is_real_path
+     * @param bool $break_line
+     * @return bool
+     * @throws FailedOnDeleteFile
+     * @throws FailedOnGetFileContent
+     * @throws FailedToOpenStream
+     * @throws FailedToWriteFromStream
+     * @throws MissingOpenedStream
+     * @throws PathNotFound
+     */
+    public static function put(
+        string         $path,
+        string         $content,
+        UpdatePosition $position = UpdatePosition::End,
+        bool           $is_real_path = false,
+        bool           $break_line = false
+    ): bool
+    {
+        if (!$is_real_path) {
+            $path = static::realPath($path);
+        }
+
+        $file_content = self::get($path, true);
+
+        $content = $position === UpdatePosition::Start ?
+            $content . ($break_line ? "\n" : '') . $file_content :
+            $file_content . ($break_line ? "\n" : '') . $content;
+
+        self::update($path, $content, is_real_path: $is_real_path);
 
         return true;
     }
