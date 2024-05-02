@@ -2,10 +2,10 @@
 
 namespace Stellar\Boot;
 
+use Stellar\Adapters\RequestAdapter;
 use Stellar\Core\Contracts\Boot\BootstrapInterface;
-use Stellar\Core\Contracts\Request;
-use Stellar\Navigation\Path\Exceptions\PathNotFoundException;
-use Stellar\Navigation\Path\Exceptions\TypeNotMatchException;
+use Stellar\Core\Contracts\RequestInterface;
+use Stellar\Navigation\Path\Exceptions\PathNotFound;
 use Stellar\Route\Exceptions\RouteNameAlreadyInUse;
 use Stellar\Router\Exceptions\PrefixIsEnabledButNotFound;
 use Stellar\Settings\Exceptions\InvalidSettingException;
@@ -15,12 +15,12 @@ abstract class Bootstrap implements BootstrapInterface
     /**
      * @param string $root_path
      * @return void
-     * @throws \Stellar\Boot\Application\Exceptions\InvalidProvider
+     * @throws Application\Exceptions\InvalidGateway
+     * @throws Application\Exceptions\InvalidProvider
      * @throws InvalidSettingException
-     * @throws PathNotFoundException
      * @throws PrefixIsEnabledButNotFound
      * @throws RouteNameAlreadyInUse
-     * @throws TypeNotMatchException
+     * @throws PathNotFound
      */
     final public static function boot(string $root_path): void
     {
@@ -28,10 +28,10 @@ abstract class Bootstrap implements BootstrapInterface
 
         Application::build($root_path);
 
-        static::afterBuild(Application::getInstance(), Application::getInstance()->getRequest());
+        static::afterBuild(Application::getInstance(), RequestAdapter::getMatchClassObject());
     }
 
-    public static function afterBuild(Application $app, Request $request): void
+    public static function afterBuild(Application $app, RequestInterface $request): void
     {
 
     }

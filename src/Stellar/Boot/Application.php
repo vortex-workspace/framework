@@ -2,24 +2,23 @@
 
 namespace Stellar\Boot;
 
+use Core\Contracts\Boot\ApplicationInterface;
+use Core\Contracts\Boot\GatewayInterface;
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
 use Stellar\Boot\Application\Exceptions\InvalidGateway;
 use Stellar\Boot\Application\Exceptions\InvalidProvider;
 use Stellar\Boot\Application\Traits\Providers;
-use Stellar\Core\Contracts\Boot\ApplicationInterface;
-use Stellar\Core\Contracts\Boot\GatewayInterface;
 use Stellar\Helpers\ArrayTool;
 use Stellar\Navigation\Directory;
-use Stellar\Navigation\Enums\ProjectPath;
-use Stellar\Navigation\Path\Exceptions\PathNotFoundException;
-use Stellar\Navigation\Path\Exceptions\TypeNotMatchException;
+use Stellar\Navigation\Enums\ApplicationPath;
+use Stellar\Navigation\Path\Exceptions\PathNotFound;
 use Stellar\Route\Exceptions\RouteNameAlreadyInUse;
 use Stellar\Router;
 use Stellar\Router\Exceptions\PrefixIsEnabledButNotFound;
+use Stellar\Setting;
 use Stellar\Settings\Enum\SettingKey;
 use Stellar\Settings\Exceptions\InvalidSettingException;
-use Stellar\Settings\Setting;
 
 final class Application implements ApplicationInterface
 {
@@ -49,9 +48,9 @@ final class Application implements ApplicationInterface
      * @throws InvalidGateway
      * @throws InvalidProvider
      * @throws InvalidSettingException
+     * @throws PathNotFound
      * @throws PrefixIsEnabledButNotFound
      * @throws RouteNameAlreadyInUse
-     * @throws TypeNotMatchException
      */
     public static function build(string $root_path, ?string $framework_path = null): void
     {
@@ -99,7 +98,7 @@ final class Application implements ApplicationInterface
     private function tryLoadEnvironment(): Application
     {
         try {
-            Dotenv::createImmutable(ProjectPath::Environment->value)->load();
+            Dotenv::createImmutable(ApplicationPath::Environment->value)->load();
         } catch (InvalidPathException) {
         }
 
@@ -109,28 +108,28 @@ final class Application implements ApplicationInterface
     /**
      * @return Application
      * @throws InvalidSettingException
-     * @throws RouteNameAlreadyInUse
      * @throws PrefixIsEnabledButNotFound
-     * @throws TypeNotMatchException
+     * @throws RouteNameAlreadyInUse
+     * @throws PathNotFound
      */
     private function loadApplicationRoutes(): Application
     {
-        $route_files = Directory::scan(ProjectPath::Routes->value);
+        $route_files = Directory::scan(root_path(ApplicationPath::Routes->value), exclude_parents: true);
 
         try {
-            require_once ProjectPath::Routes->additionalPath('web.php', true);
-        } catch (PathNotFoundException) {
+            require_once root_path(ApplicationPath::Routes->additionalPath('web.php'));
+        } catch (PathNotFound) {
         }
 
         try {
-            require_once ProjectPath::Routes->additionalPath('api.php', true);
-        } catch (PathNotFoundException) {
+            require_once root_path(ApplicationPath::Routes->additionalPath('api.php'));
+        } catch (PathNotFound) {
         }
 
         foreach (ArrayTool::deleteValue($route_files, ['web.php', 'api.php']) as $route_file) {
             try {
-                require_once ProjectPath::Routes->additionalPath($route_file, true);
-            } catch (PathNotFoundException) {
+                require_once root_path(ApplicationPath::Routes->additionalPath($route_file));
+            } catch (PathNotFound) {
             }
         }
 

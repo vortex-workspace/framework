@@ -53,9 +53,20 @@ trait Substring
         return $exploded_string[count($exploded_string) - 1];
     }
 
-    public static function beforeLast()
+    public static function beforeLast(string $string, string $separator): string
     {
+        if (!str_contains($string, $separator)) {
+            return $string;
+        }
 
+        $exploded_string = explode($separator, $string);
+
+        if (empty($exploded_string) || count($exploded_string) < 1) {
+            return $string;
+        }
+        unset($exploded_string[count($exploded_string) - 1]);
+
+        return implode('/', $exploded_string);
     }
 
     public static function before(

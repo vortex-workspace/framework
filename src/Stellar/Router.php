@@ -2,13 +2,12 @@
 
 namespace Stellar;
 
-use Stellar\Core\Contracts\RouterInterface;
+use Core\Contracts\RouterInterface;
 use Stellar\Route\Exceptions\RouteNameAlreadyInUse;
 use Stellar\Router\Exceptions\FailedOnTryAddRoute;
 use Stellar\Router\Exceptions\PrefixIsEnabledButNotFound;
 use Stellar\Settings\Enum\SettingKey;
 use Stellar\Settings\Exceptions\InvalidSettingException;
-use Stellar\Settings\Setting;
 
 class Router implements RouterInterface
 {

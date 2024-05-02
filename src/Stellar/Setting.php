@@ -1,15 +1,11 @@
 <?php
 
-namespace Stellar\Settings;
+namespace Stellar;
 
 use Stellar\Helpers\StrTool;
 use Stellar\Helpers\Typography\Enum\Typography;
-use Stellar\Navigation\Directory;
-use Stellar\Navigation\Enums\FrameworkPath;
-use Stellar\Navigation\Enums\ProjectPath;
-use Stellar\Navigation\Helpers\Path;
-use Stellar\Navigation\Path\Exceptions\PathNotFoundException;
-use Stellar\Navigation\Path\Exceptions\TypeNotMatchException;
+use Stellar\Navigation\Enums\ApplicationPath;
+use Stellar\Navigation\Path\Exceptions\PathNotFound;
 use Stellar\Settings\Exceptions\InvalidSettingException;
 
 class Setting
@@ -30,25 +26,9 @@ class Setting
             return $result;
         }
 
-        self::tryLoadSettingFileFromFramework($separated_setting[0]);
         self::tryLoadSettingFileFromApplication($separated_setting[0]);
 
         return self::tryGetFromLoadedSettings($separated_setting) ?? $default;
-    }
-
-    /**
-     * @param string $setting_key
-     * @return void
-     */
-    private static function tryLoadSettingFileFromFramework(string $setting_key): void
-    {
-        try {
-            $settings = require_once(Path::fullPath(FrameworkPath::SETTINGS->additionalPath("$setting_key.php")));
-
-            self::updateSettings($setting_key, $settings);
-        } catch (PathNotFoundException) {
-            return;
-        }
     }
 
     /**
@@ -58,11 +38,10 @@ class Setting
     private static function tryLoadSettingFileFromApplication(string $setting_file): void
     {
         try {
-            $settings = require(Path::fullPath(ProjectPath::Settings->additionalPath("$setting_file.php")));
+            $settings = require(root_path(ApplicationPath::Settings->additionalPath("$setting_file.php")));
 
             self::updateSettings($setting_file, $settings);
-        } catch (PathNotFoundException) {
-            return;
+        } catch (PathNotFound) {
         }
     }
 
@@ -126,26 +105,6 @@ class Setting
             self::$settings[$key] ?? [],
             $value
         );
-    }
-
-    /**
-     * @return void
-     * @throws PathNotFoundException
-     * @throws TypeNotMatchException
-     */
-    public static function loadAllSettings(): void
-    {
-        $framework_settings = Directory::scan(Path::fullPath(FrameworkPath::SETTINGS->value));
-
-        foreach ($framework_settings as $setting_file) {
-            self::tryLoadSettingFileFromFramework(StrTool::substring($setting_file, 0, -4));
-        }
-
-        $application_settings = Directory::scan(Path::fullPath(ProjectPath::Settings->value));
-
-        foreach ($application_settings as $setting_file) {
-            self::tryLoadSettingFileFromApplication(StrTool::substring($setting_file, 0, -4));
-        }
     }
 
     public static function uploadFileSetting(string $full_path, ?string $setting_key = null): void

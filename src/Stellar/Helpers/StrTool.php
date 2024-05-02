@@ -14,8 +14,8 @@ use Stellar\Helpers\StrTool\Traits\Skills;
 use Stellar\Helpers\StrTool\Traits\StringCases;
 use Stellar\Helpers\StrTool\Traits\StringTransformation;
 use Stellar\Helpers\StrTool\Traits\Substring;
+use Stellar\Setting;
 use Stellar\Settings\Enum\SettingKey;
-use Stellar\Settings\Setting;
 
 /**
  * @mixin  Inflector

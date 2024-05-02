@@ -3,11 +3,12 @@
 namespace Stellar;
 
 use Stellar\Boot\Application;
-use Stellar\Core\Contracts\AdapterInterface;
+use Core\Contracts\AdapterInterface;
 
 abstract class Adapter implements AdapterInterface
 {
     protected static ?string $match_class;
+    protected static object $match_instance;
 
     abstract public static function relatedInterface(): string;
 
@@ -39,8 +40,21 @@ abstract class Adapter implements AdapterInterface
         return static::$match_class;
     }
 
-    public static function getMatchClassObject(array $parameters = [], array $gateways = [])
+    public static function getMatchClassObject(array $parameters = [])
     {
+        if (empty($parameters) && isset(self::$match_instance)) {
+            return self::$match_instance;
+        }
+
+        return new (static::setMatchClass())(...$parameters);
+    }
+
+    public static function getMatchClassObjectForProvider(array $parameters = [], array $gateways = [])
+    {
+        if (empty($parameters) && isset(self::$match_instance)) {
+            return self::$match_instance;
+        }
+
         return new (static::setMatchClass($gateways))(...$parameters);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Stellar\Core\Contracts\Request;
+namespace Core\Contracts\Request;
 
 interface ValidationInterface
 {
