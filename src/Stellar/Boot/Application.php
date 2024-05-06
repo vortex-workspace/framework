@@ -9,6 +9,7 @@ use Dotenv\Exception\InvalidPathException;
 use Stellar\Boot\Application\Exceptions\InvalidGateway;
 use Stellar\Boot\Application\Exceptions\InvalidProvider;
 use Stellar\Boot\Application\Traits\Providers;
+use Stellar\Composer\Package;
 use Stellar\Helpers\ArrayTool;
 use Stellar\Navigation\Directory;
 use Stellar\Navigation\Enums\ApplicationPath;
@@ -59,7 +60,8 @@ final class Application implements ApplicationInterface
             ->setOSSeparator()
             ->tryLoadEnvironment()
             ->discoverGateways()
-            ->loadProviders()
+            ->loadProvidersFromPackages()
+            ->loadProviders(Setting::get(SettingKey::APP_PROVIDERS->value, []))
             ->loadApplicationRoutes()
             ->closeRoutesDoor();
     }

@@ -106,21 +106,7 @@ class ArrayTool
         ?string $final_delimiter = ')'
     ): string
     {
-        $formatted_string = $initial_delimiter ?? '';
-        $count = count($array);
-        $loop_count = 0;
-
-        foreach ($array as $item) {
-            $loop_count++;
-
-            if ($loop_count !== $count) {
-                $formatted_string .= $item . $separator;
-            } else {
-                $formatted_string .= $item . $final_delimiter;
-            }
-        }
-
-        return $formatted_string;
+        return ($initial_delimiter ?? '') . implode($separator, $array) . ($final_delimiter ?? '');
     }
 
     /**

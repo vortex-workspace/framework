@@ -28,4 +28,5 @@ enum SettingKey: string
     case LOGS_FORMATS_SINGLE = 'logs.formats.single';
     case LOGS_FORMATS_SINGLE_FILENAME = 'logs.formats.single.filename';
     case LOGS_FORMATS_TIMESTAMP = 'logs.formats.timestamp';
+    case StorageDrivesDefault = 'storage.drives.default';
 }

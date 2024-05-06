@@ -2,25 +2,25 @@
 
 namespace Stellar\Boot\Application\Traits;
 
+use Core\Contracts\RequestInterface;
 use Stellar\Adapters\RequestAdapter;
 use Stellar\Boot\Application;
 use Stellar\Boot\Application\Exceptions\InvalidProvider;
-use Core\Contracts\RequestInterface;
+use Stellar\Composer\Package;
+use Stellar\Navigation\Path\Exceptions\PathNotFound;
 use Stellar\Provider;
 use Stellar\Setting;
-use Stellar\Settings\Enum\SettingKey;
-use Stellar\Settings\Exceptions\InvalidSettingException;
 
 trait Providers
 {
     /**
+     * @param array $providers
      * @return Application
      * @throws InvalidProvider
-     * @throws InvalidSettingException
      */
-    private function loadProviders(): Application
+    private function loadProviders(array $providers): Application
     {
-        foreach (Setting::get(SettingKey::APP_PROVIDERS->value) as $provider) {
+        foreach ($providers as $provider) {
             if (!(($provider = (new $provider)) instanceof Provider)) {
                 throw new InvalidProvider($provider);
             }
@@ -63,5 +63,31 @@ trait Providers
         }
 
         $provider::afterNotBoot($request, $this);
+    }
+
+    /**
+     * @return $this
+     * @throws InvalidProvider
+     */
+    private function loadProvidersFromPackages(): static
+    {
+        $providers = [];
+        $final_providers = [];
+
+        try {
+            $providers = require storage_path(Package::PACKAGE_PROVIDERS_CACHE_PATH);
+        } catch (PathNotFound) {
+            $final_providers = [];
+        }
+
+        if (!empty($providers)) {
+            foreach ($providers as $package_providers) {
+                $final_providers = array_merge($final_providers, $package_providers);
+            }
+        }
+
+        $this->loadProviders($final_providers);
+
+        return $this;
     }
 }

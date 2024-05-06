@@ -1,11 +1,10 @@
 <?php
 
 use Stellar\Boot\Application;
+use Stellar\Navigation\File;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
 Application::build(__DIR__, __DIR__ . '/src');
 
-$hashed_password = '$2y$10$ZIu68yHAHKYrv3dfB7thPuRS3QeDmEU19rs2Mb73eeauqehInNfbS';
-
-dd(\Stellar\Cryptography\Hash::needRehash($hashed_password));
+\Cosmo\ConsoleIgnition::boot();

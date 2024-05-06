@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2d61f2ddb842ed5a9bd779b9746b03f3",
+    "content-hash": "0a858fb8871e0671c76a2d9e5079697f",
     "packages": [
         {
             "name": "brick/math",
@@ -3192,16 +3192,16 @@
         },
         {
             "name": "vortex-workspace/cosmo",
-            "version": "dev-master",
+            "version": "dev-feature/update-architecture",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vortex-workspace/cosmo.git",
-                "reference": "4c446ad012b9c18c9773b22dca2495bf40eacb5b"
+                "reference": "55c979dfddeb2df2ca56a52061fe3cbe455f4f93"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vortex-workspace/cosmo/zipball/4c446ad012b9c18c9773b22dca2495bf40eacb5b",
-                "reference": "4c446ad012b9c18c9773b22dca2495bf40eacb5b",
+                "url": "https://api.github.com/repos/vortex-workspace/cosmo/zipball/55c979dfddeb2df2ca56a52061fe3cbe455f4f93",
+                "reference": "55c979dfddeb2df2ca56a52061fe3cbe455f4f93",
                 "shasum": ""
             },
             "require": {
@@ -3210,7 +3210,6 @@
             "require-dev": {
                 "phpunit/phpunit": "^10.5"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "vortex": {
@@ -3241,9 +3240,9 @@
             ],
             "support": {
                 "issues": "https://github.com/vortex-workspace/cosmo/issues",
-                "source": "https://github.com/vortex-workspace/cosmo/tree/master"
+                "source": "https://github.com/vortex-workspace/cosmo/tree/feature/update-architecture"
             },
-            "time": "2024-04-28T19:28:51+00:00"
+            "time": "2024-05-05T12:06:10+00:00"
         }
     ],
     "packages-dev": [
