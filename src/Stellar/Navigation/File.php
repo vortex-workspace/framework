@@ -149,7 +149,7 @@ class File extends Path
      */
     public static function get(
         string $file_path,
-        bool   $is_real_path,
+        bool   $is_real_path = false,
         bool   $use_include_path = false,
         int    $offset = 0,
         ?int   $length = null
