@@ -3,7 +3,6 @@
 namespace Stellar\Storage;
 
 use Stellar\Gateway;
-use Stellar\Gateway\Argument;
 use Stellar\Gateway\Method;
 use Stellar\Storage\Adapters\Storage;
 
@@ -20,11 +19,9 @@ class StorageGateway extends Gateway
         return [
             Method::make(
                 'test',
-                function (string $name, string $test) { return "Name: $name, Test: $test";},
-                [
-                    Argument::make('name', 'string')->setDefault('calor'),
-                    Argument::make('test', 'string'),
-                ]
+                function (Storage $adapter, string $p1 = 'p1', string $p2 = 'p2', string $p3 = 'p3') {
+                    return "P1: $p1, P2: $p2, P3: $p3";
+                },
             ),
         ];
     }

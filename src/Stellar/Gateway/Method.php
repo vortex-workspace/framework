@@ -3,44 +3,57 @@
 namespace Stellar\Gateway;
 
 use Closure;
+use ReflectionException;
+use ReflectionFunction;
+use ReflectionParameter;
+use Stellar\Adapter;
 use Stellar\Gateway\Method\Exceptions\InvalidArgumentNameException;
 use Stellar\Gateway\Method\Exceptions\InvalidArgumentNumberException;
 use Stellar\Gateway\Method\Exceptions\InvalidArgumentTypeException;
 use Stellar\Gateway\Method\Exceptions\MissingRequiredArgumentException;
 use Stellar\Helpers\ArrayTool;
+use Stellar\Helpers\StrTool;
 
 class Method
 {
     private array $required_arguments = [];
+    /** @var ReflectionParameter[] */
+    private array $arguments = [];
+    private ReflectionFunction $callableReflection;
+    private ReflectionParameter $adapterParameter;
 
     /**
      * @param string $name
-     * @param Argument[] $arguments
-     * @param callable $execution
+     * @param callable $callable
      * @return static
+     * @throws ReflectionException
      */
-    public static function make(string $name, callable $execution, array $arguments = []): static
+    public static function make(string $name, callable $callable): static
     {
-        return new static($name, $arguments, $execution);
+        return new static($name, $callable);
     }
 
     /**
      * @param string $name
-     * @param Argument[] $arguments
      * @param Closure $execution
+     * @throws ReflectionException
      */
     private function __construct(
         public string  $name,
-        public array   $arguments,
         public Closure $execution
     )
     {
+        $this->callableReflection = new ReflectionFunction($this->execution);
+        $this->arguments = $this->callableReflection->getParameters();
         $arguments = [];
+        $this->adapterParameter = $this->arguments[0];
+        unset($this->arguments[0]);
+        $this->arguments = array_values($this->arguments);
 
         foreach ($this->arguments as $argument) {
             $arguments[] = $argument;
 
-            if (!isset($argument->default)) {
+            if (!$argument->isDefaultValueAvailable()) {
                 $this->required_arguments[] = $argument;
             }
         }
@@ -55,6 +68,7 @@ class Method
      * @throws InvalidArgumentNumberException
      * @throws InvalidArgumentTypeException
      * @throws MissingRequiredArgumentException
+     * @throws ReflectionException
      */
     public function checkArguments(array $provided_arguments): array
     {
@@ -67,7 +81,6 @@ class Method
         }
 
         $non_checked_arguments = $this->arguments;
-
 
         foreach ($provided_arguments as $index => $argument) {
             if (is_string($index)) {
@@ -85,9 +98,9 @@ class Method
             throw new MissingRequiredArgumentException($argument);
         }
 
-        if (($provided_arguments_count = count($provided_arguments)) !== ($arguments_count = count($this->arguments))) {
-            for ($i = $provided_arguments_count; $i < $arguments_count; $i++) {
-                $provided_arguments[] = $this->arguments[$i]->default;
+        if (!empty($non_checked_arguments)) {
+            foreach ($non_checked_arguments as $argument) {
+                $provided_arguments[$argument->getName()] = $argument->getDefaultValue();
             }
         }
 
@@ -95,52 +108,59 @@ class Method
     }
 
     /**
-     * @param Argument $argument
+     * @param ReflectionParameter $argument
      * @param mixed $value
      * @return void
      * @throws InvalidArgumentTypeException
      */
-    private function checkArgument(Argument $argument, mixed $value): void
+    private function checkArgument(ReflectionParameter $argument, mixed $value): void
     {
         $type = gettype($value);
 
         if ($type === 'object') {
-            if ($argument->hasType('object') || $argument->hasType($class = get_class($value))) {
+            if ($this->argumentHasType($argument, 'object') ||
+                $this->argumentHasType($argument, $class = get_class($value))) {
                 return;
             }
 
-            throw new InvalidArgumentTypeException($argument->type, $class);
+            throw new InvalidArgumentTypeException($argument->getType(), $class);
         }
 
-        if (!$argument->hasType($type)) {
-            throw new InvalidArgumentTypeException($argument->type, $type);
+        if (!$this->argumentHasType($argument, $type)) {
+            throw new InvalidArgumentTypeException($argument->getType(), $type);
         }
     }
 
     /**
      * @param array $arguments
+     * @param Adapter|string $adapter
      * @return mixed
      * @throws InvalidArgumentNameException
      * @throws InvalidArgumentNumberException
      * @throws InvalidArgumentTypeException
      * @throws MissingRequiredArgumentException
+     * @throws ReflectionException
      */
-    public function execute(array $arguments): mixed
+    public function execute(array $arguments, Adapter|string $adapter): mixed
     {
         $callable = $this->execution;
+        $parameters = $this->checkArguments($arguments);
 
-        return $callable(...$this->checkArguments($arguments));
+        array_unshift($parameters, is_string($adapter) ? new $adapter : $adapter);
+        ArrayTool::sortRegularlyByKey($parameters);
+
+        return $callable(...$parameters);
     }
 
     /**
      * @param string $name
-     * @return Argument
+     * @return ReflectionParameter
      * @throws InvalidArgumentNameException
      */
-    private function getArgumentByName(string $name): Argument
+    private function getArgumentByName(string $name): ReflectionParameter
     {
         foreach ($this->arguments as $argument) {
-            if ($argument->name === $name) {
+            if ($argument->getName() === $name) {
                 return $argument;
             }
         }
@@ -148,10 +168,14 @@ class Method
         throw new InvalidArgumentNameException($name);
     }
 
-    private function hasNonSetRequiredArguments(array $non_used_arguments): bool|Argument
+    /**
+     * @param ReflectionParameter[] $non_used_arguments
+     * @return bool|Argument
+     */
+    private function hasNonSetRequiredArguments(array $non_used_arguments): bool|ReflectionParameter
     {
         foreach ($non_used_arguments as $argument) {
-            if (!isset($argument->default)) {
+            if (!$argument->isDefaultValueAvailable()) {
                 return $argument;
             }
         }
@@ -168,5 +192,16 @@ class Method
         }
 
         return $arguments;
+    }
+
+    private function argumentHasType(ReflectionParameter $argument, string $type): bool
+    {
+        $types = [$argument->getType()];
+
+        if (StrTool::contains($types[0], '|')) {
+            $types = explode('|', $argument->getType());
+        }
+
+        return in_array($type, $types);
     }
 }

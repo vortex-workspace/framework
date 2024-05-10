@@ -19,6 +19,6 @@ abstract class Adapter implements AdapterInterface
             throw new MethodNotFound($name);
         }
 
-        return $method->execute($arguments);
+        return $method->execute($arguments, static::class);
     }
 }

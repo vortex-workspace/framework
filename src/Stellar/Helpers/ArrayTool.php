@@ -4,11 +4,12 @@ namespace Stellar\Helpers;
 
 use ReflectionException;
 use ReflectionFunction;
-use Stellar\Helpers\ArrayTool\Traits\Sort;
+use Stellar\Helpers\ArrayTool\Traits\SortByKey;
+use Stellar\Helpers\ArrayTool\Traits\SortByValue;
 
 class ArrayTool
 {
-    use Sort;
+    use SortByValue, SortByKey;
 
     /**
      * @param array $subject
