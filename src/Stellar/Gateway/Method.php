@@ -72,7 +72,7 @@ class Method
         foreach ($provided_arguments as $index => $argument) {
             if (is_string($index)) {
                 $this->checkArgument($this->getArgumentByName($index), $argument);
-                unset($non_checked_arguments[$argument->name]);
+                $non_checked_arguments = $this->unsetArgumentByName($index, $non_checked_arguments);
 
                 continue;
             }
@@ -157,5 +157,16 @@ class Method
         }
 
         return false;
+    }
+
+    private function unsetArgumentByName(string $argument_name, array $arguments): array
+    {
+        foreach ($arguments as $index => $argument) {
+            if ($argument->name === $argument_name) {
+                unset($arguments[$index]);
+            }
+        }
+
+        return $arguments;
     }
 }
