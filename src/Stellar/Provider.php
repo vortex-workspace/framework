@@ -28,10 +28,10 @@ abstract class Provider implements ProviderInterface
     }
 
     /**
-     * Store local Gateways that run only inside Provider Boot
+     * Return array of Gateways string classes.
      * @return array
      */
-    public static function localGateways(): array
+    public static function gateways(): array
     {
         return [];
     }

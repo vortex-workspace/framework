@@ -3,6 +3,8 @@
 namespace Stellar\Facades;
 
 use Closure;
+use Illuminate\Support\Arr;
+use Stellar\Helpers\ArrayTool;
 
 class Collection
 {
@@ -29,9 +31,9 @@ class Collection
         return new static($array);
     }
 
-    public function get(string|int $key): array
+    public function get(string|int $key): mixed
     {
-        return $this->array[$key];
+        return $this->array[$key] ?? null;
     }
 
     public function all(): array
@@ -64,11 +66,9 @@ class Collection
         $this->array = $data;
     }
 
-    public function map(Closure $callable): static
+    public function map(callable $callback): static
     {
-        $this->array = array_map($callable, array_values($this->array), array_keys($this->array));
-
-        return $this;
+        return new static(ArrayTool::map($this->array, $callback));
     }
 
     public function max()
@@ -81,18 +81,14 @@ class Collection
         return count($this->array);
     }
 
-    public function slice(int $offset, ?int $length = null, bool $preserve_keys = false): static
+    public function slice(int $offset, ?int $length = null): static
     {
-        $this->array = array_slice($this->array, $offset, $length, $preserve_keys);
-
-        return $this;
+        return new static(array_slice($this->array, $offset, $length, true));
     }
 
-    public function last()
+    public function last(?callable $callback = null, $default = null)
     {
-        $array = array_reverse($this->array);
-
-        return array_pop($array);
+        return ArrayTool::last($this->array, $callback, $default);
     }
 
     public function first()
@@ -100,9 +96,28 @@ class Collection
         return array_pop($this->array);
     }
 
-    public function sum(): int|float
+    public function sum()
     {
         return array_sum($this->array);
+    }
+
+    protected function useAsCallable($value)
+    {
+        return ! is_string($value) && is_callable($value);
+    }
+
+    protected function valueRetriever($value)
+    {
+        if ($this->useAsCallable($value)) {
+            return $value;
+        }
+
+        return fn ($item) => data_get($item, $value);
+    }
+
+    protected function identity()
+    {
+        return fn ($value) => $value;
     }
 
     public function implode(string $separator): string

@@ -16,7 +16,7 @@ class StorageDrive
     public function __construct(?string $drive = null, ?string $partition = null)
     {
         if ($drive === null) {
-            $drive = Setting::get(SettingKey::StorageDrivesDefault->value, 'local');
+            $drive = Setting::get(SettingKey::StorageDefaultDrive->value, 'local');
         }
 
         if ($partition === null) {

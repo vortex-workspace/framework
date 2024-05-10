@@ -2,6 +2,8 @@
 
 namespace Stellar\Helpers;
 
+use ReflectionException;
+use ReflectionFunction;
 use Stellar\Helpers\ArrayTool\Traits\Sort;
 
 class ArrayTool
@@ -188,22 +190,36 @@ class ArrayTool
         return $final_values_counts;
     }
 
-    /**
-     * @param array $array
-     * @return mixed|false
-     */
-    public static function last(array $array): mixed
+    public static function last($array, ?callable $callback = null, $default = null)
     {
-        return end($array);
+        if (is_null($callback)) {
+            return empty($array) ? value($default) : end($array);
+        }
+
+        return static::first(array_reverse($array, true), $callback, $default);
     }
 
-    /**
-     * @param array $array
-     * @return mixed|false
-     */
-    public static function first(array $array): mixed
+    public static function first($array, ?callable $callback = null, $default = null)
     {
-        return reset($array);
+        if (is_null($callback)) {
+            if (empty($array)) {
+                return value($default);
+            }
+
+            foreach ($array as $item) {
+                return $item;
+            }
+
+            return value($default);
+        }
+
+        foreach ($array as $key => $value) {
+            if ($callback($value, $key)) {
+                return $value;
+            }
+        }
+
+        return value($default);
     }
 
     /**
@@ -230,5 +246,96 @@ class ArrayTool
     public static function hasValue(array $array, mixed $value, bool $strict = false): bool
     {
         return in_array($value, $array, $strict);
+    }
+
+    public static function get($array, $key, $default = null)
+    {
+        if (!static::accessible($array)) {
+            return value($default);
+        }
+
+        if (is_null($key)) {
+            return $array;
+        }
+
+        if (static::exists($array, $key)) {
+            return $array[$key];
+        }
+
+        if (!str_contains($key, '.')) {
+            return $array[$key] ?? value($default);
+        }
+
+        foreach (explode('.', $key) as $segment) {
+            if (static::accessible($array) && static::exists($array, $segment)) {
+                $array = $array[$segment];
+            } else {
+                return value($default);
+            }
+        }
+
+        return $array;
+    }
+
+    public static function accessible($value)
+    {
+        return is_array($value) || $value instanceof \ArrayAccess;
+    }
+
+    public static function exists($array, $key)
+    {
+        if ($array instanceof Enumerable) {
+            return $array->has($key);
+        }
+
+        if ($array instanceof \ArrayAccess) {
+            return $array->offsetExists($key);
+        }
+
+        if (is_float($key)) {
+            $key = (string)$key;
+        }
+
+        return array_key_exists($key, $array);
+    }
+
+    public static function map(array $array, callable $callback): array
+    {
+        $keys = array_keys($array);
+
+        try {
+            $items = array_map($callback, $array, $keys);
+        } catch (\ArgumentCountError) {
+            $items = array_map($callback, $array);
+        }
+
+        return array_combine($keys, $items);
+    }
+
+    /**
+     * @param array $subject
+     * @param string|callable $separator
+     * @return string
+     * @throws ReflectionException
+     */
+    public static function implode(array $subject, string|callable $separator): string
+    {
+        if (is_callable($separator)) {
+            $final_string = '';
+            $full = false;
+            $function = new ReflectionFunction($separator);
+
+            if ($function->getNumberOfParameters() === 2) {
+                $full = true;
+            }
+
+            foreach ($subject as $index => $value) {
+                $final_string .= $full ? $separator($index, $value) : $separator($value);
+            }
+
+            return $final_string;
+        }
+
+        return implode($separator, $subject);
     }
 }

@@ -2,11 +2,15 @@
 
 namespace Stellar\Boot\Application\Traits;
 
+use Core\Contracts\GatewayInterface;
 use Core\Contracts\RequestInterface;
 use Stellar\Adapters\RequestAdapter;
 use Stellar\Boot\Application;
+use Stellar\Boot\Application\Exceptions\InvalidGateway;
 use Stellar\Boot\Application\Exceptions\InvalidProvider;
+use Stellar\Boot\Application\Exceptions\TryRegisterDuplicatedGatewayMethod;
 use Stellar\Composer\Package;
+use Stellar\Gateway;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
 use Stellar\Provider;
 use Stellar\Setting;
@@ -16,7 +20,9 @@ trait Providers
     /**
      * @param array $providers
      * @return Application
+     * @throws InvalidGateway
      * @throws InvalidProvider
+     * @throws TryRegisterDuplicatedGatewayMethod
      */
     private function loadProviders(array $providers): Application
     {
@@ -25,22 +31,11 @@ trait Providers
                 throw new InvalidProvider($provider);
             }
 
-            $gateways = $this->gateways;
-
-            if (!empty($provider_gateways = $provider::localGateways())) {
-                $formated_gateways = [];
-
-                foreach ($provider_gateways as $provider_gateway) {
-                    $formated_gateways[$provider_gateway::baseInterface()] = $provider_gateway;
-                }
-
-                $gateways = array_merge($gateways, $formated_gateways);
-            }
-
             $this->loadProviderSettings($provider);
             $provider::routes();
             $this->appendCommands($provider::commands());
-            $this->bootProvider(RequestAdapter::getMatchClassObjectForProvider(gateways: $gateways), new $provider);
+            $this->loadProviderGateways($provider);
+            $this->bootProvider(new RequestAdapter(), new $provider);
         }
 
         return $this;
@@ -68,6 +63,7 @@ trait Providers
     /**
      * @return $this
      * @throws InvalidProvider
+     * @throws TryRegisterDuplicatedGatewayMethod
      */
     private function loadProvidersFromPackages(): static
     {
@@ -89,5 +85,38 @@ trait Providers
         $this->loadProviders($final_providers);
 
         return $this;
+    }
+
+    /**
+     * @param Provider $provider
+     * @return void
+     * @throws InvalidGateway
+     * @throws TryRegisterDuplicatedGatewayMethod
+     */
+    public function loadProviderGateways(Provider $provider): void
+    {
+        foreach ($provider::gateways() as $gateway) {
+            if (!((new $gateway) instanceof GatewayInterface)) {
+                throw new InvalidGateway($gateway);
+            }
+
+            $this->loadGateway($gateway);
+        }
+    }
+
+    /**
+     * @param Gateway|string $gateway
+     * @return void
+     * @throws TryRegisterDuplicatedGatewayMethod
+     */
+    public function loadGateway(Gateway|string $gateway): void
+    {
+        foreach ($gateway::methods() as $method) {
+            if (isset($this->gateways[$gateway::adapterClass()][$method->name])) {
+                throw new TryRegisterDuplicatedGatewayMethod($method->name);
+            }
+
+            $this->gateways[$gateway::adapterClass()][$method->name] = $method;
+        }
     }
 }

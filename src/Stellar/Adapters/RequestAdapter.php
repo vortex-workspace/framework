@@ -2,19 +2,9 @@
 
 namespace Stellar\Adapters;
 
+use Core\Contracts\RequestInterface;
 use Stellar\Adapter;
-use Stellar\Core\Contracts\RequestInterface;
-use Stellar\Request;
 
-class RequestAdapter extends Adapter
+class RequestAdapter extends Adapter implements RequestInterface
 {
-    public static function relatedInterface(): string
-    {
-        return RequestInterface::class;
-    }
-
-    public static function defaultClass(): string
-    {
-        return Request::class;
-    }
 }

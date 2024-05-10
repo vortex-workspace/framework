@@ -24,6 +24,11 @@ class Environment
     public const MAIL_SMTP_SECURE = 'MAIL_SMTP_SECURE';
     public const MAIL_PORT = 'MAIL_PORT';
 
+    public static function get(string $key, mixed $default = null): mixed
+    {
+        return $_ENV[$key] ?? $default;
+    }
+
     public static function appName()
     {
         return $_ENV[self::APP_NAME] ?? null;

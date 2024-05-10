@@ -3,13 +3,14 @@
 namespace Stellar\Boot;
 
 use Core\Contracts\Boot\ApplicationInterface;
-use Core\Contracts\Boot\GatewayInterface;
+use Core\Contracts\GatewayInterface;
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
 use Stellar\Boot\Application\Exceptions\InvalidGateway;
 use Stellar\Boot\Application\Exceptions\InvalidProvider;
+use Stellar\Boot\Application\Exceptions\TryRegisterDuplicatedGatewayMethod;
 use Stellar\Boot\Application\Traits\Providers;
-use Stellar\Composer\Package;
+use Stellar\Gateway\Method;
 use Stellar\Helpers\ArrayTool;
 use Stellar\Navigation\Directory;
 use Stellar\Navigation\Enums\ApplicationPath;
@@ -52,6 +53,7 @@ final class Application implements ApplicationInterface
      * @throws PathNotFound
      * @throws PrefixIsEnabledButNotFound
      * @throws RouteNameAlreadyInUse
+     * @throws TryRegisterDuplicatedGatewayMethod
      */
     public static function build(string $root_path, ?string $framework_path = null): void
     {
@@ -68,6 +70,7 @@ final class Application implements ApplicationInterface
 
     /**
      * @return Application
+     * @throws TryRegisterDuplicatedGatewayMethod
      * @throws InvalidGateway
      * @throws InvalidSettingException
      */
@@ -78,7 +81,7 @@ final class Application implements ApplicationInterface
                 throw new InvalidGateway($gateway);
             }
 
-            $this->gateways[$gateway::baseInterface()] = $gateway;
+            $this->loadGateway($gateway);
         }
 
         return $this;
@@ -164,12 +167,17 @@ final class Application implements ApplicationInterface
         return $this->commands;
     }
 
-    public function getGatewayByInterface(string $interface): ?string
+    public function getGatewayByAdapter(string $interface, string $method): ?Method
     {
         if (!isset($this->gateways[$interface])) {
             return null;
         }
 
-        return $this->gateways[$interface]::customClass();
+        return $this->gateways[$interface][$method] ?? null;
+    }
+
+    public function getGateways(): array
+    {
+        return $this->gateways;
     }
 }

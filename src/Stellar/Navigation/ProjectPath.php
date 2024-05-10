@@ -49,6 +49,16 @@ class ProjectPath
 
     /**
      * @param string|null $additional_path
+     * @return string
+     * @throws PathNotFound
+     */
+    public static function publicPath(?string $additional_path = null): string
+    {
+        return self::mountPath($additional_path, 'public');
+    }
+
+    /**
+     * @param string|null $additional_path
      * @param string|null $root_relative_path
      * @param string $base_path
      * @return string

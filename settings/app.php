@@ -17,10 +17,13 @@ return [
     'default_date_format' => 'Y-m-d',
     'default_date_time_format' => 'Y-m-d h:i:s',
     'providers' => [
-        \Stellar\Providers\VortexCore::class
+        \Stellar\Providers\VortexCore::class,
+        \Stellar\Storage\StorageProvider::class,
     ],
     /**
      * List all Gateways that need overwrite in application
      */
-    'gateways' => [],
+    'gateways' => [
+        \Stellar\Storage\StorageGateway::class,
+    ],
 ];
