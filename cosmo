@@ -17,10 +17,10 @@ dd($stor->a(function ($instance) {
 dd(\Stellar\Storage\Adapters\Storage::get());
 
 //FILESYSTEM_DRIVER=s3
-$awsAccessKey='AKIAXYKJQIQ5RZ3HAQIS';
-$awsSecretKey='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';
+$awsAccessKey='';
+$awsSecretKey='';
 $region = 'us-east-2';
-//AWS_BUCKET=banking-pagamento
+//AWS_BUCKET=
 //AWS_URL=
 //AWS_USE_PATH_STYLE_ENDPOINT=true
 
