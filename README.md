@@ -9,8 +9,9 @@
 - [Request](#Request)
 
 ## Gateway
-If you need to override internal framework classes, you can create custom Gateways, and Vortex will utilize our class 
-within the application. To set up our Gateways, configure them in the `app.gateways` setting as shown below:
+If you need to add a method to Adapters, you just need to create and set `new Gateway` classes, and then either set them 
+in the `app.php` configuration file or in the `gateways()` method inside `Providers`. After set our custom methods from
+our custom `Gateway`, you can access the same in the `Adapter` classes.
 
 ```php
 <?php
@@ -23,7 +24,7 @@ return [
 ];
 ```
 
-**Warning**: If you configure multiple Gateways for the same Interface, the last one provided will be used.
+**Warning**: If you configure multiple Gateways methods for the same Adapter with same name , one error will be triggered.
 
 ### Gateway class
 Gateways are straightforward classes that establish mappings between base interfaces and custom classes requiring 
@@ -33,21 +34,30 @@ the base interface for our custom class, and `customClass()`, which refers to ou
 ```php
 <?php
 
-use Stellar\Core\Contracts\RequestInterface;use Stellar\Gateway;
+namespace Stellar\Storage;
 
-class RequestGateway extends Gateway
+use Stellar\Gateway;use Stellar\Gateway\Method;use Stellar\Storage\Adapters\Storage;
+
+class StorageGateway extends Gateway
 {
-    public static function baseInterface(): string
+    public static function adapterClass(): string
     {
-        return RequestInterface::class;
+        return Storage::class;
     }
-    
-    public static function customClass(): string
+
+    public static function methods(): array
     {
-        return CustomRequest::class;
+        return [
+            Method::make('test', function (Storage $adapter, string $drive) {
+                return $adapter::drive($drive);
+            }),
+        ];
     }
 }
 ``` 
+
+**Warning**: Look who the first parameter from Gateway callable must be the Adapter object or Adapter::class, and is 
+required and must be the first parameter.
 
 ## Provider
 

@@ -6,6 +6,9 @@ use Core\Contracts\Boot\ApplicationInterface;
 use Core\Contracts\GatewayInterface;
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
+use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\Local\LocalFilesystemAdapter;
 use Stellar\Boot\Application\Exceptions\InvalidGateway;
 use Stellar\Boot\Application\Exceptions\InvalidProvider;
 use Stellar\Boot\Application\Exceptions\TryRegisterDuplicatedGatewayMethod;
@@ -29,6 +32,7 @@ final class Application implements ApplicationInterface
     private static Application $instance;
     private array $commands = [];
     private array $gateways = [];
+    private Filesystem $filesystem;
 
     private function __construct()
     {
@@ -97,17 +101,28 @@ final class Application implements ApplicationInterface
 
         define('FRAMEWORK_PATH', $framework_path);
 
+        $this->filesystem = new Filesystem(new LocalFilesystemAdapter($root_path));
+
         return $this;
     }
 
     private function tryLoadEnvironment(): Application
     {
         try {
-            Dotenv::createImmutable(ApplicationPath::Environment->value)->load();
+            Dotenv::createImmutable(root_path())->load();
         } catch (InvalidPathException) {
         }
 
         return $this;
+    }
+
+    public function getFilesystem(?FilesystemAdapter $adapter = null): Filesystem
+    {
+        if ($adapter !== null) {
+            return new Filesystem($adapter);
+        }
+
+        return $this->filesystem;
     }
 
     /**

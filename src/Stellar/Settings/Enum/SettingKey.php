@@ -30,4 +30,5 @@ enum SettingKey: string
     case LOGS_FORMATS_TIMESTAMP = 'logs.formats.timestamp';
     case StorageDefaultDrive = 'storage.default';
     case StorageDrives = 'storage.drives';
+    case S3DefaultRegion = 's3.default_region';
 }

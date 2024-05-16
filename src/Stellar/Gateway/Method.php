@@ -20,7 +20,6 @@ class Method
     /** @var ReflectionParameter[] */
     private array $arguments = [];
     private ReflectionFunction $callableReflection;
-    private ReflectionParameter $adapterParameter;
 
     /**
      * @param string $name
@@ -40,14 +39,14 @@ class Method
      */
     private function __construct(
         public string  $name,
-        public Closure $execution
+        public Closure $execution,
     )
     {
         $this->callableReflection = new ReflectionFunction($this->execution);
         $this->arguments = $this->callableReflection->getParameters();
         $arguments = [];
-        $this->adapterParameter = $this->arguments[0];
         unset($this->arguments[0]);
+
         $this->arguments = array_values($this->arguments);
 
         foreach ($this->arguments as $argument) {
@@ -133,7 +132,7 @@ class Method
 
     /**
      * @param array $arguments
-     * @param Adapter|string $adapter
+     * @param Adapter|string|null $adapter
      * @return mixed
      * @throws InvalidArgumentNameException
      * @throws InvalidArgumentNumberException
@@ -141,13 +140,16 @@ class Method
      * @throws MissingRequiredArgumentException
      * @throws ReflectionException
      */
-    public function execute(array $arguments, Adapter|string $adapter): mixed
+    public function execute(array $arguments, null|Adapter|string $adapter): mixed
     {
         $callable = $this->execution;
         $parameters = $this->checkArguments($arguments);
 
-        array_unshift($parameters, is_string($adapter) ? new $adapter : $adapter);
-        ArrayTool::sortRegularlyByKey($parameters);
+        if ($adapter !== null) {
+
+            array_unshift($parameters, is_string($adapter) ? new $adapter : $adapter);
+            ArrayTool::sortRegularlyByKey($parameters);
+        }
 
         return $callable(...$parameters);
     }

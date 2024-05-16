@@ -23,7 +23,5 @@ return [
     /**
      * List all Gateways that need overwrite in application
      */
-    'gateways' => [
-        \Stellar\Storage\StorageGateway::class,
-    ],
+    'gateways' => [],
 ];

@@ -10,4 +10,8 @@ use Stellar\Storage as StellarStorage;
  */
 class Storage extends Adapter
 {
+    public static function defaultClass(): string
+    {
+        return StellarStorage::class;
+    }
 }
