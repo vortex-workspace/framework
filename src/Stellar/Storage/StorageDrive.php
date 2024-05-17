@@ -288,7 +288,7 @@ class StorageDrive
      * @throws DrivePartitionIsDisabled
      * @throws InvalidSettingException
      */
-    private function setupDriveSettings(): void
+    protected function setupDriveSettings(): void
     {
         $this->filesystem = Application::getInstance()->getFilesystem();
         $drive_settings = $this->getDriveSettings($this->drive);

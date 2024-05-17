@@ -13,6 +13,7 @@ use Stellar\Boot\Application\Exceptions\InvalidGateway;
 use Stellar\Boot\Application\Exceptions\InvalidProvider;
 use Stellar\Boot\Application\Exceptions\TryRegisterDuplicatedGatewayMethod;
 use Stellar\Boot\Application\Traits\Providers;
+use Stellar\Facades\Log;
 use Stellar\Gateway\Method;
 use Stellar\Helpers\ArrayTool;
 use Stellar\Navigation\Directory;
@@ -66,6 +67,7 @@ final class Application implements ApplicationInterface
             ->setOSSeparator()
             ->tryLoadEnvironment()
             ->discoverGateways()
+            ->setErrorHandler()
             ->loadProvidersFromPackages()
             ->loadProviders(Setting::get(SettingKey::APP_PROVIDERS->value, []))
             ->loadApplicationRoutes()
@@ -106,6 +108,10 @@ final class Application implements ApplicationInterface
         return $this;
     }
 
+    /**
+     * @return Application
+     * @throws PathNotFound
+     */
     private function tryLoadEnvironment(): Application
     {
         try {
@@ -194,5 +200,23 @@ final class Application implements ApplicationInterface
     public function getGateways(): array
     {
         return $this->gateways;
+    }
+
+    /**
+     * @return Application
+     * @throws InvalidSettingException
+     * @throws PathNotFound
+     */
+    private function setErrorHandler(): Application
+    {
+        $error_settings = Setting::get('error');
+
+        ini_set('log_errors', $error_settings['log'] ?? true);
+        ini_set('error_log', Log::getFilename(root_path() . '/storage/logs', Setting::get('logs', [])));
+        error_reporting($error_settings['reporting'] ?? E_ALL);
+        ini_set('display_errors', $error_settings['display'] ?? true);
+
+
+        return $this;
     }
 }

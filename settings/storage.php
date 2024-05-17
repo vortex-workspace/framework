@@ -6,8 +6,6 @@ return [
     'default' => 'local',
     'drives' => [
         'local' => [
-            // Set a custom name for creating a symlink directory. This name will be used to access storage routes.
-            'custom_public_directory' => '',
             'partitions' => [
                 'public' => true,
                 'private' => true,
@@ -28,6 +26,7 @@ return [
             'endpoint' => env(S3StorageProvider::ENVIRONMENT_AWS_ENDPOINT),
             'bucket' => env(S3StorageProvider::ENVIRONMENT_AWS_STORAGE_BUCKET),
             'use_ssl' => env(S3StorageProvider::ENVIRONMENT_AWS_USE_SSL),
+            'exception_mode' => true,
         ]
     ],
 ];

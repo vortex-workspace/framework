@@ -7,6 +7,7 @@
     - [Directory](#Directory)
     - [Symlink](#Symlink)
 - [Request](#Request)
+- [Storage](#Storage)
 
 ## Gateway
 If you need to add a method to Adapters, you just need to create and set `new Gateway` classes, and then either set them 
@@ -216,3 +217,179 @@ class EmailRule extends Rule
 }
 ```
 
+## Storage
+Storage is the simplified way Vortex handles files inserted into the application, abstracting their manipulation and 
+access. Within Storage, it is possible to create drives, and each drive has two partitions: one public and one private. 
+The public partition can be made available for public access, while the private partition cannot.
+
+### Drive
+To configure a `drive`, simply register it in the storage settings file. In this example we register the drive "drive_1".
+
+```php
+<?php
+// Settings/storage.php
+
+return [
+    'drives' => [
+        'drive_1' => [
+        
+        ],
+    ],
+];
+```
+
+To set a default drive for Storage, add the `default` key within the storage settings with the name of the configured 
+drive key.
+
+```php
+<?php
+// Settings/storage.php
+
+return [
+    'default' => 'drive_1',
+    'drives' => [
+        'drive_1' => [],
+    ],
+];
+```
+
+To specify that errors when interacting with the drive should not trigger exceptions, set the `exception_mode` key to 
+false.
+
+```php
+<?php
+// Settings/storage.php
+
+return [
+    'drives' => [
+        'drive_1' => [
+            'exception_mode' => false,        
+        ],
+    ],
+];
+```
+
+### Partitions
+Each drive has a `public` partition and a `private` partition. By default, the public partition is enabled and the private 
+partition is disabled. However, these settings can be changed according to the example below. Within the partitions key 
+of your drive, there are keys for each partition that should be associated with a boolean value indicating whether they 
+are enabled or not.
+
+```php
+<?php
+// Settings/storage.php
+
+return [
+    'drives' => [
+        'drive_1' => [
+            'partitions' => [
+                'public' => true,
+                'private' => false,
+            ],
+        ],
+    ],
+];
+```
+
+### Adapter
+#### Presets
+Storage has various definitions to look for default values, either in the settings or Vortex presets. Therefore, if no 
+preset is specified, all values will be taken by default, including which drive will be accessed, which can be 
+configured as demonstrated earlier with the default key. To specify how the drive be accessed, the following methods 
+should be used:
+
+```php
+<?php
+use Stellar\Storage\Adapters\Storage;
+
+Storage::drive('drive_1') // Specify witch drive be access.
+    ->publicPartition() // Specify witch partition be access.
+    ->exceptionMode(false); // Define the exception_mode
+```
+
+> :warning:
+> Note that the presets defined during interaction with Storage will take precedence over the settings.
+
+#### Get
+To get Drive file content, use the method `get()`, you need pass the partition relative path to the method like bellow:
+
+```php
+<?php
+use Stellar\Storage\Adapters\Storage;
+
+Storage::drive('drive_1')->get('documents/contract.pdf');
+```
+
+> :nazar_amulet:
+> Note that the presets defined during interaction with Storage will take precedence over the settings.
+
+#### Url
+The public access for files are enable only for `public` partition and `url()` method not accept try call him from 
+`private` partition and will throw an Exception. If try access valid file the public URL will be returned.
+
+```php
+<?php
+use Stellar\Storage\Adapters\Storage;
+
+Storage::drive('drive_1')->url('documents/contract.pdf');
+```
+
+#### Exists
+The `exists()` method will return boolean value, true if the file exists in the drive or false if not.
+
+```php
+<?php
+use Stellar\Storage\Adapters\Storage;
+
+Storage::drive('drive_1')->exists('documents/contract.pdf');
+```
+
+#### Mime Type
+To return the file type use the method `mimeType()` to get that.
+
+```php
+<?php
+use Stellar\Storage\Adapters\Storage;
+
+Storage::drive('drive_1')->mimeType('documents/contract.pdf');
+```
+
+#### Path
+Use the method `path()` to get the full path for the file.
+
+```php
+<?php
+use Stellar\Storage\Adapters\Storage;
+
+Storage::drive('drive_1')->path('documents/contract.pdf');
+```
+
+#### Change Partition
+To change file partition use the methods `turnPrivate()` or `turnPublic()`, this just can change partition inside same 
+drive. If try turn file to the same partition, this method will throw an Exception or return false.
+
+```php
+<?php
+use Stellar\Storage\Adapters\Storage;
+
+Storage::drive('drive_1')->turnPrivate('documents/contract.pdf');
+Storage::drive('drive_1')->turnPublic('documents/contract.pdf');
+```
+
+#### Put
+Tu add new files to drive you can use string content or one object `Stream`.
+
+```php
+<?php
+
+use Stellar\Navigation\Stream\Enums\OpenMode;
+use Stellar\Storage\Adapters\Storage;
+use Stellar\Navigation\Stream;
+
+// Using string content.
+Storage::drive('drive_1')->put('test.txt', 'Test text example.');
+
+// Using Stream.
+$stream = Stream::make('file_path', OpenMode::X_PLUS_MODE)->write('Test text example.');
+Storage::drive('drive_1')->put('test.txt', $stream);
+```
