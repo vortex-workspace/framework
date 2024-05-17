@@ -2,30 +2,9 @@
 
 use Cosmo\ConsoleIgnition;
 use Stellar\Boot\Application;
-use Stellar\Storage\AWS\S3;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
 Application::build(__DIR__, __DIR__ . '/src');
-dd(\Stellar\Storage\Adapters\Storage::test('jose'));
-$x = function () {};
-dd(is_callable($x));
-$stor = new \Stellar\Storage\Adapters\Storage();
-dd($stor->a(function ($instance) {
-    return $instance->getName();
-}));
-dd(\Stellar\Storage\Adapters\Storage::get());
-
-//FILESYSTEM_DRIVER=s3
-$awsAccessKey='';
-$awsSecretKey='';
-$region = 'us-east-2';
-//AWS_BUCKET=
-//AWS_URL=
-//AWS_USE_PATH_STYLE_ENDPOINT=true
-
-$s3 = new S3($awsAccessKey, $awsSecretKey);
-$s3->setSignatureVersion('v3');
-dd($s3->putObjectString('test jose', 'vortex-framework-test', 'file-test', S3::ACL_PUBLIC_READ, [], ['Content-Type' => 'text/plain']));
 
 ConsoleIgnition::boot();

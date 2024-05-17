@@ -12,5 +12,10 @@ abstract class Gateway implements GatewayInterface
     /**
      * @return Method[]
      */
-    abstract public static function methods(): array;
+    abstract public static function staticMethods(): array;
+
+    /**
+     * @return Method[]
+     */
+    abstract public static function nonStaticMethods(): array;
 }

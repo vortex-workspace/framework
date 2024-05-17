@@ -49,15 +49,17 @@ class StorageGateway extends Gateway
     public static function methods(): array
     {
         return [
-            Method::make('test', function (Storage $adapter, string $drive) {
-                return $adapter::drive($drive);
+            Method::make('test', function (Storage $adapter, string $drive): string {
+                return $drive;
             }),
         ];
     }
 }
 ``` 
 
-**Warning**: Look who the first parameter from Gateway callable must be the Adapter object or Adapter::class, and is 
+> :warning: Remember set the `callable` return type like the example to help `ide:gateways` command.
+
+> :warning: Look who the first parameter from `Gateway` callable must be the Adapter object or `Adapter::class`, and is 
 required and must be the first parameter.
 
 ## Provider

@@ -62,6 +62,7 @@ trait Providers
 
     /**
      * @return $this
+     * @throws InvalidGateway
      * @throws InvalidProvider
      * @throws TryRegisterDuplicatedGatewayMethod
      */
@@ -111,12 +112,22 @@ trait Providers
      */
     public function loadGateway(Gateway|string $gateway): void
     {
-        foreach ($gateway::methods() as $method) {
-            if (isset($this->gateways[$gateway::adapterClass()][$method->name])) {
+        foreach ($gateway::staticMethods() as $method) {
+            if (isset($this->gateways[$gateway::adapterClass()]['static'][$method->name]) ||
+                isset($this->gateways[$gateway::adapterClass()]['non_static'][$method->name])) {
                 throw new TryRegisterDuplicatedGatewayMethod($method->name);
             }
 
-            $this->gateways[$gateway::adapterClass()][$method->name] = $method;
+            $this->gateways[$gateway::adapterClass()]['static'][$method->name] = $method;
+        }
+
+        foreach ($gateway::nonStaticMethods() as $method) {
+            if (isset($this->gateways[$gateway::adapterClass()]['static'][$method->name]) ||
+                isset($this->gateways[$gateway::adapterClass()]['non_static'][$method->name])) {
+                throw new TryRegisterDuplicatedGatewayMethod($method->name);
+            }
+
+            $this->gateways[$gateway::adapterClass()]['non_static'][$method->name] = $method;
         }
     }
 }

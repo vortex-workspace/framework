@@ -15,6 +15,8 @@
   "require": {
     "php": "~8.3.0",
     "ext-ctype": "*",
+    "ext-curl": "*",
+    "ext-dom": "*",
     "ext-intl": "*",
     "ext-libxml": "*",
     "ext-mbstring": "*",
@@ -23,6 +25,8 @@
     "aws/aws-sdk-php": "^3.306",
     "doctrine/inflector": "~2.0.10",
     "guzzlehttp/guzzle": "~7.8.0",
+    "league/flysystem": "^3.27",
+    "league/flysystem-aws-s3-v3": "*",
     "monolog/monolog": "~3.6.0",
     "nesbot/carbon": "~2.72.3",
     "ramsey/uuid": "~4.7.6",
@@ -30,9 +34,8 @@
     "spatie/regex": "~3.1.1",
     "symfony/console": "~v7.0.7",
     "vlucas/phpdotenv": "~v5.6.0",
-    "vortex-workspace/cosmo": "dev-feature/COS-2-implement-prompt-helpers",
-    "ext-curl": "*",
-    "ext-dom": "*"
+    "vortex-workspace/aws-s3-storage": "dev-feature/implement-storage",
+    "vortex-workspace/cosmo": "dev-feature/COS-2-implement-prompt-helpers"
   },
   "require-dev": {
     "composer/composer": "*",
@@ -56,7 +59,8 @@
   },
   "scripts": {
     "post-autoload-dump": [
-      "Stellar\\Composer\\Package::autoload"
+      "Stellar\\Composer\\Package::autoload",
+      "@php cosmo ide:gateways -q"
     ]
   },
   "config": {

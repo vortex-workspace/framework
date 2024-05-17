@@ -206,4 +206,9 @@ class Method
 
         return in_array($type, $types);
     }
+
+    public function getCallableReflection(): ReflectionFunction
+    {
+        return $this->callableReflection;
+    }
 }

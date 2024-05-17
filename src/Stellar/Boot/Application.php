@@ -188,13 +188,13 @@ final class Application implements ApplicationInterface
         return $this->commands;
     }
 
-    public function getGatewayByAdapter(string $interface, string $method): ?Method
+    public function getGatewayByAdapter(string $interface, string $method, bool $static = true): ?Method
     {
-        if (!isset($this->gateways[$interface])) {
+        if (!isset($this->gateways[$interface][$static ? 'static' : 'non_static'])) {
             return null;
         }
 
-        return $this->gateways[$interface][$method] ?? null;
+        return $this->gateways[$interface][$static ? 'static' : 'non_static'][$method] ?? null;
     }
 
     public function getGateways(): array
