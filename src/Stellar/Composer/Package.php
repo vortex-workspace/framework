@@ -88,7 +88,6 @@ class Package
             storage_path() . '/internals/cache/packages',
             root_path('stubs/base_array.php'),
             ['$array' => var_export($providers->toArray(), true)],
-            is_real_path: true,
             force: true
         );
     }

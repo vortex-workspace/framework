@@ -34,6 +34,7 @@ final class Application implements ApplicationInterface
     private array $commands = [];
     private array $gateways = [];
     private Filesystem $filesystem;
+    private array $adapters = [];
 
     private function __construct()
     {
@@ -200,6 +201,11 @@ final class Application implements ApplicationInterface
     public function getGateways(): array
     {
         return $this->gateways;
+    }
+
+    public function getAdapters(): array
+    {
+        return $this->adapters;
     }
 
     /**

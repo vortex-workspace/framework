@@ -37,19 +37,19 @@ the base interface for our custom class, and `customClass()`, which refers to ou
 
 namespace Stellar\Storage;
 
-use Stellar\Gateway;use Stellar\Gateway\Method;use Stellar\Storage\Adapters\Storage;
+use Stellar\Adapters\StorageAdapter;use Stellar\Gateway;use Stellar\Gateway\Method;
 
 class StorageGateway extends Gateway
 {
     public static function adapterClass(): string
     {
-        return Storage::class;
+        return StorageAdapter::class;
     }
 
     public static function methods(): array
     {
         return [
-            Method::make('test', function (Storage $adapter, string $drive): string {
+            Method::make('test', function (StorageAdapter $adapter, string $drive): string {
                 return $drive;
             }),
         ];
@@ -302,9 +302,9 @@ should be used:
 
 ```php
 <?php
-use Stellar\Storage\Adapters\Storage;
+use Stellar\Adapters\StorageAdapter;
 
-Storage::drive('drive_1') // Specify witch drive be access.
+StorageAdapter::drive('drive_1') // Specify witch drive be access.
     ->publicPartition() // Specify witch partition be access.
     ->exceptionMode(false); // Define the exception_mode
 ```
@@ -317,9 +317,9 @@ To get Drive file content, use the method `get()`, you need pass the partition r
 
 ```php
 <?php
-use Stellar\Storage\Adapters\Storage;
+use Stellar\Adapters\StorageAdapter;
 
-Storage::drive('drive_1')->get('documents/contract.pdf');
+StorageAdapter::drive('drive_1')->get('documents/contract.pdf');
 ```
 
 > :nazar_amulet:
@@ -331,9 +331,9 @@ The public access for files are enable only for `public` partition and `url()` m
 
 ```php
 <?php
-use Stellar\Storage\Adapters\Storage;
+use Stellar\Adapters\StorageAdapter;
 
-Storage::drive('drive_1')->url('documents/contract.pdf');
+StorageAdapter::drive('drive_1')->url('documents/contract.pdf');
 ```
 
 #### Exists
@@ -341,9 +341,9 @@ The `exists()` method will return boolean value, true if the file exists in the 
 
 ```php
 <?php
-use Stellar\Storage\Adapters\Storage;
+use Stellar\Adapters\StorageAdapter;
 
-Storage::drive('drive_1')->exists('documents/contract.pdf');
+StorageAdapter::drive('drive_1')->exists('documents/contract.pdf');
 ```
 
 #### Mime Type
@@ -351,9 +351,9 @@ To return the file type use the method `mimeType()` to get that.
 
 ```php
 <?php
-use Stellar\Storage\Adapters\Storage;
+use Stellar\Adapters\StorageAdapter;
 
-Storage::drive('drive_1')->mimeType('documents/contract.pdf');
+StorageAdapter::drive('drive_1')->mimeType('documents/contract.pdf');
 ```
 
 #### Path
@@ -361,9 +361,9 @@ Use the method `path()` to get the full path for the file.
 
 ```php
 <?php
-use Stellar\Storage\Adapters\Storage;
+use Stellar\Adapters\StorageAdapter;
 
-Storage::drive('drive_1')->path('documents/contract.pdf');
+StorageAdapter::drive('drive_1')->path('documents/contract.pdf');
 ```
 
 #### Change Partition
@@ -372,10 +372,10 @@ drive. If try turn file to the same partition, this method will throw an Excepti
 
 ```php
 <?php
-use Stellar\Storage\Adapters\Storage;
+use Stellar\Adapters\StorageAdapter;
 
-Storage::drive('drive_1')->turnPrivate('documents/contract.pdf');
-Storage::drive('drive_1')->turnPublic('documents/contract.pdf');
+StorageAdapter::drive('drive_1')->turnPrivate('documents/contract.pdf');
+StorageAdapter::drive('drive_1')->turnPublic('documents/contract.pdf');
 ```
 
 #### Put
@@ -384,14 +384,12 @@ Tu add new files to drive you can use string content or one object `Stream`.
 ```php
 <?php
 
-use Stellar\Navigation\Stream\Enums\OpenMode;
-use Stellar\Storage\Adapters\Storage;
-use Stellar\Navigation\Stream;
+use Stellar\Adapters\StorageAdapter;use Stellar\Navigation\Stream;use Stellar\Navigation\Stream\Enums\OpenMode;
 
 // Using string content.
-Storage::drive('drive_1')->put('test.txt', 'Test text example.');
+StorageAdapter::drive('drive_1')->put('test.txt', 'Test text example.');
 
 // Using Stream.
 $stream = Stream::make('file_path', OpenMode::X_PLUS_MODE)->write('Test text example.');
-Storage::drive('drive_1')->put('test.txt', $stream);
+StorageAdapter::drive('drive_1')->put('test.txt', $stream);
 ```

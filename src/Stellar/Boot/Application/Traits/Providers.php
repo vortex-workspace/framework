@@ -4,8 +4,10 @@ namespace Stellar\Boot\Application\Traits;
 
 use Core\Contracts\GatewayInterface;
 use Core\Contracts\RequestInterface;
+use Stellar\AdapterAlias;
 use Stellar\Adapters\RequestAdapter;
 use Stellar\Boot\Application;
+use Stellar\Boot\Application\Exceptions\DuplicatedAdapter;
 use Stellar\Boot\Application\Exceptions\InvalidGateway;
 use Stellar\Boot\Application\Exceptions\InvalidProvider;
 use Stellar\Boot\Application\Exceptions\TryRegisterDuplicatedGatewayMethod;
@@ -20,6 +22,7 @@ trait Providers
     /**
      * @param array $providers
      * @return Application
+     * @throws DuplicatedAdapter
      * @throws InvalidGateway
      * @throws InvalidProvider
      * @throws TryRegisterDuplicatedGatewayMethod
@@ -34,6 +37,7 @@ trait Providers
             $this->loadProviderSettings($provider);
             $provider::routes();
             $this->appendCommands($provider::commands());
+            $this->createProviderAdapters($provider);
             $this->loadProviderGateways($provider);
             $this->bootProvider(new RequestAdapter(), new $provider);
         }
@@ -62,6 +66,7 @@ trait Providers
 
     /**
      * @return $this
+     * @throws DuplicatedAdapter
      * @throws InvalidGateway
      * @throws InvalidProvider
      * @throws TryRegisterDuplicatedGatewayMethod
@@ -129,5 +134,38 @@ trait Providers
 
             $this->gateways[$gateway::adapterClass()]['non_static'][$method->name] = $method;
         }
+    }
+
+    /**
+     * @param string|Provider $provider
+     * @return void
+     * @throws DuplicatedAdapter
+     */
+    private function createProviderAdapters(string|Provider $provider): void
+    {
+        if (!empty($adapters = $provider::adapters())) {
+            /** @var AdapterAlias $adapter */
+            foreach ($adapters as $adapter) {
+                $this->createAdapterClass($adapter);
+            }
+        }
+    }
+
+    /**
+     * @param AdapterAlias $adapterAlias
+     * @return void
+     * @throws DuplicatedAdapter
+     */
+    private function createAdapterClass(AdapterAlias $adapterAlias): void
+    {
+        $full_class = $adapterAlias->namespace . '\\' . $adapterAlias->class_name;
+
+        if (isset($this->adapters[$full_class])) {
+            throw new DuplicatedAdapter($full_class);
+        }
+
+        $default_method = "public static function defaultClass(): string{return '$adapterAlias->default_class';}";
+        eval("namespace $adapterAlias->namespace { class $adapterAlias->class_name extends \Stellar\Adapter { $default_method }}");
+        $this->adapters[$full_class] = $adapterAlias;
     }
 }

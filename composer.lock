@@ -3016,12 +3016,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/vortex-workspace/aws-s3-storage.git",
-                "reference": "d15775979a73a2ddbd04d67740d8767c10302f99"
+                "reference": "f504b76b86af45fa59dbe64d16cc9449401631eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vortex-workspace/aws-s3-storage/zipball/d15775979a73a2ddbd04d67740d8767c10302f99",
-                "reference": "d15775979a73a2ddbd04d67740d8767c10302f99",
+                "url": "https://api.github.com/repos/vortex-workspace/aws-s3-storage/zipball/f504b76b86af45fa59dbe64d16cc9449401631eb",
+                "reference": "f504b76b86af45fa59dbe64d16cc9449401631eb",
                 "shasum": ""
             },
             "require": {
@@ -3063,7 +3063,7 @@
                 "issues": "https://github.com/vortex-workspace/aws-s3-storage/issues",
                 "source": "https://github.com/vortex-workspace/aws-s3-storage/tree/feature/implement-storage"
             },
-            "time": "2024-05-17T00:04:25+00:00"
+            "time": "2024-05-18T18:20:34+00:00"
         },
         {
             "name": "vortex-workspace/cosmo",

@@ -57,4 +57,9 @@ abstract class Provider implements ProviderInterface
     public static function afterNotBoot(RequestInterface $request, Application &$application): void
     {
     }
+
+    public static function adapters(): array
+    {
+        return [];
+    }
 }
