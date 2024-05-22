@@ -1,6 +1,5 @@
 {
   "name": "vortex-workspace/framework",
-  "description": "",
   "minimum-stability": "stable",
   "license": "MIT",
   "keywords": [
@@ -14,28 +13,32 @@
     }
   ],
   "require": {
-    "php": "^8.3",
+    "php": "~8.3.0",
     "ext-ctype": "*",
+    "ext-curl": "*",
+    "ext-dom": "*",
     "ext-intl": "*",
     "ext-libxml": "*",
+    "ext-mbstring": "*",
     "ext-openssl": "*",
     "ext-simplexml": "*",
-    "doctrine/inflector": "^2.0",
-    "monolog/monolog": "^3.5",
-    "nesbot/carbon": "^2.72",
-    "ramsey/uuid": "^4.7",
-    "robinvdvleuten/ulid": "^5.0",
-    "spatie/ignition": "^1.13",
-    "spatie/regex": "^3.1",
-    "symfony/console": "^7.0",
-    "symfony/var-dumper": "^7.0",
-    "vlucas/phpdotenv": "^5.6",
-    "vortex-workspace/cosmo": "dev-master"
+    "doctrine/inflector": "~2.0.10",
+    "guzzlehttp/guzzle": "~7.8.0",
+    "league/flysystem": "^3.27",
+    "monolog/monolog": "~3.6.0",
+    "nesbot/carbon": "~2.72.3",
+    "ramsey/uuid": "~4.7.6",
+    "robinvdvleuten/ulid": "~v5.0.0",
+    "spatie/regex": "~3.1.1",
+    "vlucas/phpdotenv": "~v5.6.0",
+    "vortex-workspace/aws-s3-storage": "~1.0.0",
+    "vortex-workspace/cosmo": "dev-feature/COS-2-implement-prompt-helpers"
   },
   "require-dev": {
     "composer/composer": "*",
-    "fakerphp/faker": "^1.23",
-    "phpunit/phpunit": "^10.5"
+    "symfony/var-dumper": "~7.0.7",
+    "fakerphp/faker": "~v1.23.1",
+    "phpunit/phpunit": "~10.5.20"
   },
   "autoload": {
     "psr-4": {
@@ -44,14 +47,17 @@
     }
   },
   "autoload-dev": {
-    "files": ["src/Stellar/Alias/main.php"],
+    "files": [
+      "src/Stellar/Alias/main.php"
+    ],
     "psr-4": {
       "Stellar\\Tests\\": "tests/"
     }
   },
   "scripts": {
-    "post-package-install": [
-      "Stellar\\Composer\\Package::discover"
+    "post-autoload-dump": [
+      "Stellar\\Composer\\Package::autoload",
+      "@php cosmo ide:gateways -q"
     ]
   },
   "config": {

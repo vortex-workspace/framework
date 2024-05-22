@@ -73,6 +73,7 @@ trait Scan
      * @param ScanSortMode $mode
      * @param bool $is_real_path
      * @param bool $return_full_path
+     * @param array $excludes
      * @return array
      * @throws PathNotFound
      */
@@ -81,6 +82,7 @@ trait Scan
         ScanSortMode $mode = ScanSortMode::None,
         bool         $is_real_path = false,
         bool         $return_full_path = true,
+        array $excludes = []
     ): array
     {
         $directories = self::scan($path, $mode, $is_real_path, true, $return_full_path, true);
@@ -97,6 +99,10 @@ trait Scan
                     $return_full_path
                 );
             }
+        }
+
+        foreach ($excludes as $exclude) {
+            unset($directories[StrTool::forceFinishWith($path, '/') . StrTool::removeIfStartWith($exclude, '/')]);
         }
 
         return $directories;

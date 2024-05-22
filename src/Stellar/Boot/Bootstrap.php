@@ -2,9 +2,9 @@
 
 namespace Stellar\Boot;
 
+use Core\Contracts\Boot\BootstrapInterface;
+use Core\Contracts\RequestInterface;
 use Stellar\Adapters\RequestAdapter;
-use Stellar\Core\Contracts\Boot\BootstrapInterface;
-use Stellar\Core\Contracts\RequestInterface;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
 use Stellar\Route\Exceptions\RouteNameAlreadyInUse;
 use Stellar\Router\Exceptions\PrefixIsEnabledButNotFound;

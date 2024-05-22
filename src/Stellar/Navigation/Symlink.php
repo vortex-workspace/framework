@@ -41,7 +41,7 @@ class Symlink extends Path
             $target_path = self::realPath($target_path);
         }
 
-        if (!self::exist($link_directory_path)) {
+        if (Directory::notExist($link_directory_path)) {
             Directory::create($link_directory_path, $recursive);
         }
 
@@ -196,5 +196,15 @@ class Symlink extends Path
 
         return self::copy($origin_path, $final_directory, $force, true, $recursive) &&
             self::delete($origin_path, true);
+    }
+
+    public static function exist(string $path, bool $is_real_path = false): bool
+    {
+        return is_link($path);
+    }
+
+    public static function notExist(string $path, bool $is_real_path = false): bool
+    {
+        return !self::exist($path, $is_real_path);
     }
 }

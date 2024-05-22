@@ -5,25 +5,40 @@ use Stellar\Facades\Log\Enum\LogHandler;
 
 return [
     /**
-     * Specify the log handlers to be used on Vortex application.
-     * 'handler' => Stellar\Vortex\Facades\Log\Enum\LogHandler
-     * https://github.com/Seldaek/monolog/blob/main/doc/02-handlers-formatters-processors.md#handlers
+     * Set the format to create new files
+     * 'format' => Stellar\Vortex\Facades\Log\Enum\LogFileFormat
+     * Default: LogFileFormat::SINGLE
      */
-    'handler' => LogHandler::STREAM_HANDLER,
+    'format' => LogFileFormat::DATE,
 
     /**
-     * Set the format to create new files
-     * 'use_format' => Stellar\Vortex\Facades\Log\Enum\LogFileFormat
+     * Whether the messages that are handled can bubble up the stack or not
      */
-    'use_format' => LogFileFormat::SINGLE,
+    'bubble' => false,
+
+    /**
+     * Set the max number of files, to disable set null.
+     * Default: null
+     */
+    'max_files' => null,
 
     /**
      * Set the individual log file settings
      */
     'formats' => [
         'single' => [
-            'filename' => '.log'
+            'filename' => 'vortex.log'
         ],
-        'timestamp' => 'daily'
+        'date' => [
+            'format' => 'Y-m-d',
+            'suffix' => 'log',
+        ],
     ],
+
+    /**
+     * Set the line format prefix.
+     */
+    'line_formatter' => [
+        'date_format' => 'Y-m-d H:m:s'
+    ]
 ];

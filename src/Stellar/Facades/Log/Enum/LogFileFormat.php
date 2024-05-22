@@ -6,5 +6,4 @@ enum LogFileFormat
 {
     case DATE;
     case SINGLE;
-    case TIMESTAMP;
 }

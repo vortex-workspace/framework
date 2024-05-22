@@ -3,19 +3,21 @@
 namespace Stellar\Facades\Log\Traits;
 
 use Monolog\Level;
-use Stellar\Facades\Log\Exceptions\InvalidLogHandler;
-use Stellar\Navigation\Path\Exceptions\FailedOnDeleteException;
-use Stellar\Navigation\Path\Exceptions\PathNotFoundException;
+use Stellar\Navigation\Directory\Exceptions\DirectoryAlreadyExist;
+use Stellar\Navigation\Directory\Exceptions\FailedOnCreateDirectory;
+use Stellar\Navigation\Path\Exceptions\PathNotFound;
+use Stellar\Settings\Exceptions\InvalidSettingException;
 
 trait LogModes
 {
     /**
      * - DEBUG (100): Detailed debug information.
      * @param mixed $log
-     * * @return void
-     * * @throws InvalidLogHandler
-     * * @throws PathNotFoundException
-     * * @throws FailedOnDeleteException
+     * @return void
+     * @throws DirectoryAlreadyExist
+     * @throws FailedOnCreateDirectory
+     * @throws PathNotFound
+     * @throws InvalidSettingException
      */
     public static function debug(mixed $log): void
     {
@@ -25,10 +27,11 @@ trait LogModes
     /**
      * - INFO (200): Interesting events. Examples: User logs in, SQL logs.
      * @param mixed $log
-     * * @return void
-     * * @throws InvalidLogHandler
-     * * @throws PathNotFoundException
-     * * @throws FailedOnDeleteException
+     * @return void
+     * @throws DirectoryAlreadyExist
+     * @throws FailedOnCreateDirectory
+     * @throws InvalidSettingException
+     * @throws PathNotFound
      */
     public static function info(mixed $log): void
     {
@@ -38,10 +41,11 @@ trait LogModes
     /**
      * - NOTICE (250): Normal but significant events.
      * @param mixed $log
-     * * @return void
-     * * @throws InvalidLogHandler
-     * * @throws PathNotFoundException
-     * * @throws FailedOnDeleteException
+     * @return void
+     * @throws DirectoryAlreadyExist
+     * @throws FailedOnCreateDirectory
+     * @throws InvalidSettingException
+     * @throws PathNotFound
      */
     public static function notice(mixed $log): void
     {
@@ -52,10 +56,11 @@ trait LogModes
      * - WARNING (300): Exceptional occurrences that are not errors. Examples: Use of deprecated APIs, poor use of an
      * API, undesirable things that are not necessarily wrong.
      * @param mixed $log
-     * * @return void
-     * * @throws InvalidLogHandler
-     * * @throws PathNotFoundException
-     * * @throws FailedOnDeleteException
+     * @return void
+     * @throws DirectoryAlreadyExist
+     * @throws FailedOnCreateDirectory
+     * @throws InvalidSettingException
+     * @throws PathNotFound
      */
     public static function warning(mixed $log): void
     {
@@ -65,10 +70,11 @@ trait LogModes
     /**
      * - ERROR (400): Runtime errors that do not require immediate action but should typically be logged and monitored.
      * @param mixed $log
-     * * @return void
-     * * @throws InvalidLogHandler
-     * * @throws PathNotFoundException
-     * * @throws FailedOnDeleteException
+     * @return void
+     * @throws DirectoryAlreadyExist
+     * @throws FailedOnCreateDirectory
+     * @throws InvalidSettingException
+     * @throws PathNotFound
      */
     public static function error(mixed $log): void
     {
@@ -79,9 +85,10 @@ trait LogModes
      * - CRITICAL (500): Critical conditions. Example: Application component unavailable, unexpected exception.
      * @param mixed $log
      * @return void
-     * @throws InvalidLogHandler
-     * @throws PathNotFoundException
-     * @throws FailedOnDeleteException
+     * @throws DirectoryAlreadyExist
+     * @throws FailedOnCreateDirectory
+     * @throws InvalidSettingException
+     * @throws PathNotFound
      */
     public static function critical(mixed $log): void
     {
@@ -92,10 +99,11 @@ trait LogModes
      * - ALERT (550): Action must be taken immediately. Example: Entire website down, database unavailable, etc. This
      * should trigger the SMS alerts and wake you up.
      * @param mixed $log
-     * * @return void
-     * * @throws InvalidLogHandler
-     * * @throws PathNotFoundException
-     * * @throws FailedOnDeleteException
+     * @return void
+     * @throws DirectoryAlreadyExist
+     * @throws FailedOnCreateDirectory
+     * @throws InvalidSettingException
+     * @throws PathNotFound
      */
     public static function alert(mixed $log): void
     {
@@ -105,10 +113,11 @@ trait LogModes
     /**
      * - EMERGENCY (600): Emergency: system is unusable.
      * @param mixed $log
-     * * @return void
-     * * @throws InvalidLogHandler
-     * * @throws PathNotFoundException
-     * * @throws FailedOnDeleteException
+     * @return void
+     * @throws DirectoryAlreadyExist
+     * @throws FailedOnCreateDirectory
+     * @throws InvalidSettingException
+     * @throws PathNotFound
      */
     public static function emergency(mixed $log): void
     {
