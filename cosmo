@@ -1,0 +1,10 @@
+<?php
+
+use Cosmo\ConsoleIgnition;
+use Stellar\Boot\Application;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+Application::build(__DIR__, __DIR__ . '/src');
+
+ConsoleIgnition::boot();
