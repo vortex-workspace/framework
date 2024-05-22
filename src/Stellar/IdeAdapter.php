@@ -18,6 +18,19 @@ class IdeAdapter extends Command
         return 'ide:gateways';
     }
 
+    /**
+     * @return CommandResponse
+     * @throws File\Exceptions\FailedOnDeleteFile
+     * @throws File\Exceptions\FileAlreadyExists
+     * @throws Navigation\Directory\Exceptions\DirectoryAlreadyExist
+     * @throws Navigation\Directory\Exceptions\FailedOnCreateDirectory
+     * @throws Navigation\Path\Exceptions\PathNotFound
+     * @throws Navigation\Stream\Exceptions\FailedToCloseStream
+     * @throws Navigation\Stream\Exceptions\FailedToOpenStream
+     * @throws Navigation\Stream\Exceptions\FailedToWriteFromStream
+     * @throws Navigation\Stream\Exceptions\MissingOpenedStream
+     * @throws Navigation\Stream\Exceptions\TryCloseNonOpenedStream
+     */
     protected function handle(): CommandResponse
     {
         $gateway_adapters = [];
@@ -33,17 +46,10 @@ class IdeAdapter extends Command
                 foreach ($methods as $method_name => $method) {
                     $formated_method = [];
                     $formated_method['name'] = $method_name;
-                    $formated_method['instance_string'] = $adapter;
+                    $formated_method['adapter'] = $adapter;
                     $formated_method['method_type'] = $method_type;
 
                     foreach ($method->getCallableReflection()->getParameters() as $parameter) {
-                        if ($parameter->getPosition() === 0) {
-                            if (($type = $parameter->getType()) !== null) {
-                                $formated_method['instance'] = $type;
-                                continue;
-                            }
-                        }
-
                         $formated_method['parameters'][] = $parameter;
                     }
 
@@ -55,7 +61,15 @@ class IdeAdapter extends Command
         }
 
         $array_classes = $this->mountAdapterClasses($adapters, $gateway_adapters);
-        $string_classes = '<?php ' . PHP_EOL . PHP_EOL;
+        $string_classes = '<?php ' .
+            PHP_EOL .
+            '/** @noinspection ALL */' .
+            PHP_EOL .
+            '/** @formatter:off */' .
+            PHP_EOL .
+            '/** @phpcs:ignoreFile */' .
+            PHP_EOL .
+            PHP_EOL;
 
         foreach ($array_classes as $class) {
             $string_classes .= $this->mountFinalStringClass($class) . PHP_EOL . PHP_EOL . PHP_EOL;
@@ -72,12 +86,12 @@ class IdeAdapter extends Command
         return CommandResponse::SUCCESS;
     }
 
-    private function mountFinalStringClass(array $class)
+    private function mountFinalStringClass(array $class):array|string
     {
         return str_replace('$methods', $class['methods'] ?? '', $class['scope']);
     }
 
-    private function mountAdapterClass(AdapterAlias $adapterAlias)
+    private function mountAdapterClass(AdapterAlias $adapterAlias):string
     {
         return 'namespace ' .
             $adapterAlias->namespace .
@@ -134,7 +148,7 @@ class IdeAdapter extends Command
             '        {' .
             PHP_EOL .
             '            /** @var \\' .
-            ($method['instance']->getName() ?? $method['instance_string']) .
+            $method['adapter'] .
             ' $adapter **/' .
             PHP_EOL .
             '            return $adapter->' .
@@ -153,12 +167,14 @@ class IdeAdapter extends Command
             return '';
         }
 
-        $parameters_string = '';
+        $full_parameters_string = '';
 
         $parameters_count = count($parameters);
 
         /** @var ReflectionParameter $parameter */
         foreach ($parameters as $index => $parameter) {
+            $parameters_string = '';
+
             if ($without_type === false && ($types = $parameter->getType()) !== null) {
                 $types = $types instanceof ReflectionUnionType ? $types->getTypes() : [$types];
 
@@ -166,6 +182,14 @@ class IdeAdapter extends Command
 
                 foreach ($types as $type_index => $type) {
                     $parameters_string .= $type->getName() . ($type_index + 1 === $type_count ? ' ' : '|');
+                }
+
+                if ($parameter->allowsNull() && !StrTool::contains($parameters_string, 'null')) {
+                    if ($type_count > 0) {
+                        $parameters_string = "null|$parameters_string";
+                    } else {
+                        $parameters_string = "null $parameters_string";
+                    }
                 }
             }
 
@@ -176,8 +200,10 @@ class IdeAdapter extends Command
             }
 
             $parameters_string .= ($parameters_count === $index + 1 ? '' : ', ');
+
+            $full_parameters_string .= $parameters_string;
         }
 
-        return $parameters_string;
+        return $full_parameters_string;
     }
 }

@@ -379,12 +379,14 @@ StorageAdapter::drive('drive_1')->turnPublic('documents/contract.pdf');
 ```
 
 #### Put
-Tu add new files to drive you can use string content or one object `Stream`.
+To add new files to drive you can use string content or one object `Stream`.
 
 ```php
 <?php
 
-use Stellar\Adapters\StorageAdapter;use Stellar\Navigation\Stream;use Stellar\Navigation\Stream\Enums\OpenMode;
+use Stellar\Adapters\StorageAdapter;
+use Stellar\Navigation\Stream;
+use Stellar\Navigation\Stream\Enums\OpenMode;
 
 // Using string content.
 StorageAdapter::drive('drive_1')->put('test.txt', 'Test text example.');
@@ -392,4 +394,26 @@ StorageAdapter::drive('drive_1')->put('test.txt', 'Test text example.');
 // Using Stream.
 $stream = Stream::make('file_path', OpenMode::X_PLUS_MODE)->write('Test text example.');
 StorageAdapter::drive('drive_1')->put('test.txt', $stream);
+```
+
+#### Delete
+Where need delete files from drives, use the method `delete()` from Storage.
+
+```php
+<?php
+
+use Stellar\Adapters\StorageAdapter;
+
+StorageAdapter::delete('test.txt');
+```
+
+#### Size
+To get file size inside drives from Storage, use the method `size()`.
+
+```php
+<?php
+
+use Stellar\Adapters\StorageAdapter;
+
+StorageAdapter::size('test.txt');
 ```

@@ -7,6 +7,7 @@ use League\Flysystem\FilesystemException;
 use Stellar\Boot\Application;
 use Stellar\Helpers\StrTool;
 use Stellar\Navigation\File;
+use Stellar\Navigation\File\Exceptions\FailedOnDeleteFile;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
 use Stellar\Navigation\Stream;
 use Stellar\Setting;
@@ -16,6 +17,7 @@ use Stellar\Storage\Exceptions\DriveNotDefined;
 use Stellar\Storage\StorageDrive\Exceptions\DrivePartitionIsDisabled;
 use Stellar\Storage\StorageDrive\Exceptions\FailedOnGetContent;
 use Stellar\Storage\StorageDrive\Exceptions\FailedOnGetMimeType;
+use Stellar\Storage\StorageDrive\Exceptions\FailedOnGetSize;
 use Stellar\Storage\StorageDrive\Exceptions\FailedOnPutFile;
 use Stellar\Storage\StorageDrive\Exceptions\UrlBlockedForPrivatePartition;
 use Stellar\Storage\StorageDrive\Traits\ManagePartition;
@@ -110,6 +112,32 @@ class StorageDrive
         $path = "storage/drives/$this->drive/$partition" . StrTool::forceStartWith($path, '/');
 
         return File::exist($path);
+    }
+
+    /**
+     * @param string $path
+     * @return bool
+     * @throws DriveNotDefined
+     * @throws DrivePartitionIsDisabled
+     * @throws FailedOnDeleteFile
+     * @throws InvalidSettingException
+     * @throws PathNotFound
+     */
+    public function delete(string $path): bool
+    {
+        $this->setupDriveSettings();
+        $path = StrTool::removeIfStartAndFinishWith($path, '/');
+        $location = "storage/drives/$this->drive/$this->partition/$path";
+
+        try {
+            return File::delete($location);
+        } catch (PathNotFound) {
+            if ($this->exception_mode === true) {
+                throw new PathNotFound($location);
+            }
+
+            return false;
+        }
     }
 
     /**
@@ -236,6 +264,34 @@ class StorageDrive
         } catch (FilesystemException $exception) {
             if ($this->exception_mode === true) {
                 throw new FailedOnGetContent($path, $exception->getMessage());
+            }
+
+            return false;
+        }
+    }
+
+    /**
+     * @param string $path
+     * @return string|bool
+     * @throws DriveNotDefined
+     * @throws DrivePartitionIsDisabled
+     * @throws FailedOnGetSize
+     * @throws InvalidSettingException
+     * @throws PathNotFound
+     */
+    public function size(string $path): int|bool
+    {
+        $this->setupDriveSettings();
+        $path = "drives/$this->drive/$this->partition" . StrTool::forceStartWith($path, '/');
+        storage_path($path);
+
+        try {
+            return Application::getInstance()
+                ->getFilesystem()
+                ->fileSize("storage/$path");
+        } catch (FilesystemException $exception) {
+            if ($this->exception_mode === true) {
+                throw new FailedOnGetSize($path, $exception->getMessage());
             }
 
             return false;

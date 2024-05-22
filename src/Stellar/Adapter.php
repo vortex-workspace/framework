@@ -2,8 +2,8 @@
 
 namespace Stellar;
 
+use Closure;
 use Core\Contracts\AdapterInterface;
-use ReflectionException;
 use Stellar\Adapter\Exceptions\MethodNotFound;
 use Stellar\Boot\Application;
 
@@ -16,25 +16,59 @@ abstract class Adapter implements AdapterInterface
      * @param string $name
      * @param array $arguments
      * @return mixed
-     * @throws Gateway\Method\Exceptions\InvalidArgumentNameException
-     * @throws Gateway\Method\Exceptions\InvalidArgumentNumberException
-     * @throws Gateway\Method\Exceptions\InvalidArgumentTypeException
-     * @throws Gateway\Method\Exceptions\MissingRequiredArgumentException
      * @throws MethodNotFound
-     * @throws ReflectionException
      */
     public static function __callStatic(string $name, array $arguments)
     {
-        $method = Application::getInstance()->getGatewayByAdapter(static::class, $name);
+        if (method_exists(static::defaultClass(), $name)) {
+            return static::defaultClass()::$name(...$arguments);
+        }
 
-        if ($method === null) {
-            if (method_exists(static::defaultClass(), $name)) {
-                return static::defaultClass()::$name(...$arguments);
-            }
-
+        if (!static::hasGatewayMethod($name)) {
             throw new MethodNotFound($name);
         }
 
-        return $method->execute($arguments, static::class);
+        $method = Application::getInstance()->getGatewayByAdapter(static::class, $name)->callable;
+
+        if ($method instanceof Closure) {
+            return call_user_func_array(Closure::bind($method, null, static::class), $arguments);
+        }
+
+        return call_user_func_array($method, $arguments);
+    }
+
+    /**
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     * @throws MethodNotFound
+     */
+    public function __call(string $name, array $arguments)
+    {
+        if (method_exists($default = (new (static::defaultClass())), $name)) {
+            return $default->$name(...$arguments);
+        }
+
+        if (!static::hasGatewayMethod($name, false)) {
+            throw new MethodNotFound($name);
+        }
+
+        $method = Application::getInstance()->getGatewayByAdapter(static::class, $name, false)->callable;
+
+        if ($method instanceof Closure) {
+            return call_user_func_array($method->bindTo($this, static::class), $arguments);
+        }
+
+        return call_user_func_array($method, $arguments);
+    }
+
+    /**
+     * @param string $name
+     * @param bool $static
+     * @return bool
+     */
+    public static function hasGatewayMethod(string $name, bool $static = true): bool
+    {
+        return (bool)Application::getInstance()->getGatewayByAdapter(static::class, $name, $static);
     }
 }

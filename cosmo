@@ -6,5 +6,5 @@ use Stellar\Boot\Application;
 require_once __DIR__ . '/vendor/autoload.php';
 
 Application::build(__DIR__, __DIR__ . '/src');
-
+dd(\Stellar\Router::getInstance()->getRoutes());
 ConsoleIgnition::boot();

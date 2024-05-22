@@ -2,6 +2,7 @@
 
 namespace Stellar;
 
+use Stellar\Navigation\File\Exceptions\FailedOnDeleteFile;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
 use Stellar\Navigation\Stream;
 use Stellar\Settings\Exceptions\InvalidSettingException;
@@ -127,8 +128,22 @@ class Storage
      * @throws InvalidSettingException
      * @throws PathNotFound
      */
-    public function path(string $path): bool|string
+    public static function path(string $path): bool|string
     {
         return (new StorageDrive())->path($path);
+    }
+
+    /**
+     * @param string $path
+     * @return bool
+     * @throws DriveNotDefined
+     * @throws DrivePartitionIsDisabled
+     * @throws InvalidSettingException
+     * @throws FailedOnDeleteFile
+     * @throws PathNotFound
+     */
+    public static function delete(string $path): bool
+    {
+        return (new StorageDrive())->delete($path);
     }
 }
