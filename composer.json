@@ -44,12 +44,12 @@
     "psr-4": {
       "Core\\": "src/Core/",
       "Stellar\\": "src/Stellar/"
-    }
-  },
-  "autoload-dev": {
+    },
     "files": [
       "src/Stellar/Alias/main.php"
-    ],
+    ]
+  },
+  "autoload-dev": {
     "psr-4": {
       "Stellar\\Tests\\": "tests/"
     }
