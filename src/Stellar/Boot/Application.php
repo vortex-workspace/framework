@@ -9,6 +9,7 @@ use Dotenv\Exception\InvalidPathException;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\Local\LocalFilesystemAdapter;
+use Stellar\Boot\Application\Exceptions\DuplicatedAdapter;
 use Stellar\Boot\Application\Exceptions\InvalidGateway;
 use Stellar\Boot\Application\Exceptions\InvalidProvider;
 use Stellar\Boot\Application\Exceptions\TryRegisterDuplicatedGatewayMethod;
@@ -60,6 +61,7 @@ final class Application implements ApplicationInterface
      * @throws PrefixIsEnabledButNotFound
      * @throws RouteNameAlreadyInUse
      * @throws TryRegisterDuplicatedGatewayMethod
+     * @throws DuplicatedAdapter
      */
     public static function build(string $root_path, ?string $framework_path = null): void
     {
@@ -141,7 +143,13 @@ final class Application implements ApplicationInterface
      */
     private function loadApplicationRoutes(): Application
     {
-        $route_files = Directory::scan(root_path(ApplicationPath::Routes->value), exclude_parents: true);
+        $route_files = [];
+        
+        try {
+            $route_files = Directory::scan(root_path(ApplicationPath::Routes->value), exclude_parents: true);
+        } catch (PathNotFound) {
+
+        }
 
         try {
             require_once root_path(ApplicationPath::Routes->additionalPath('web.php'));
