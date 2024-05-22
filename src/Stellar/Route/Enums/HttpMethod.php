@@ -2,7 +2,7 @@
 
 namespace Stellar\Route\Enums;
 
-enum HttpMethods
+enum HttpMethod
 {
     case CONNECT;
     case DELETE;

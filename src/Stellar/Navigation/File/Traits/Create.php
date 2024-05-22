@@ -3,6 +3,9 @@
 namespace Stellar\Navigation\File\Traits;
 
 use Stellar\Helpers\StrTool;
+use Stellar\Navigation\Directory;
+use Stellar\Navigation\Directory\Exceptions\DirectoryAlreadyExist;
+use Stellar\Navigation\Directory\Exceptions\FailedOnCreateDirectory;
 use Stellar\Navigation\File\Exceptions\FailedOnDeleteFile;
 use Stellar\Navigation\File\Exceptions\FailedOnGetFileContent;
 use Stellar\Navigation\File\Exceptions\FileAlreadyExists;
@@ -21,29 +24,35 @@ trait Create
     /**
      * @param string $filename
      * @param string $directory_path
-     * @param bool $is_real_path
      * @param bool $force
      * @param string|null $content
+     * @param bool $recursive
      * @return bool
+     * @throws Directory\Exceptions\DirectoryAlreadyExist
+     * @throws Directory\Exceptions\FailedOnCreateDirectory
      * @throws FailedOnDeleteFile
      * @throws FailedToCloseStream
      * @throws FailedToOpenStream
-     * @throws FileAlreadyExists
-     * @throws PathNotFound
      * @throws FailedToWriteFromStream
+     * @throws FileAlreadyExists
      * @throws MissingOpenedStream
+     * @throws PathNotFound
      * @throws TryCloseNonOpenedStream
      */
     private static function createFrom(
         string  $filename,
         string  $directory_path,
-        bool    $is_real_path = false,
         bool    $force = false,
-        ?string $content = null
+        ?string $content = null,
+        bool    $recursive = false
     ): bool
     {
-        if (!$is_real_path) {
-            $directory_path = static::realPath($directory_path);
+        if (Directory::notExist($directory_path)) {
+            if ($recursive === false) {
+                throw new PathNotFound($directory_path);
+            }
+
+            Directory::create($directory_path, true, force: true);
         }
 
         if (Path::exist($full_path = "$directory_path/$filename")) {
@@ -68,9 +77,11 @@ trait Create
     /**
      * @param string $filename
      * @param string $directory_path
-     * @param bool $is_real_path
      * @param bool $force
+     * @param bool $recursive
      * @return bool
+     * @throws DirectoryAlreadyExist
+     * @throws FailedOnCreateDirectory
      * @throws FailedOnDeleteFile
      * @throws FailedToCloseStream
      * @throws FailedToOpenStream
@@ -83,20 +94,22 @@ trait Create
     public static function create(
         string $filename,
         string $directory_path,
-        bool   $is_real_path = false,
         bool   $force = false,
+        bool   $recursive = false
     ): bool
     {
-        return self::createFrom($filename, $directory_path, $is_real_path, $force);
+        return self::createFrom($filename, $directory_path, $force, recursive: $recursive);
     }
 
     /**
      * @param string $filename
      * @param string $directory_path
      * @param string $content
-     * @param bool $is_real_path
      * @param bool $force
+     * @param bool $recursive
      * @return bool
+     * @throws DirectoryAlreadyExist
+     * @throws FailedOnCreateDirectory
      * @throws FailedOnDeleteFile
      * @throws FailedToCloseStream
      * @throws FailedToOpenStream
@@ -110,11 +123,11 @@ trait Create
         string $filename,
         string $directory_path,
         string $content,
-        bool   $is_real_path = false,
         bool   $force = false,
+        bool   $recursive = false
     ): bool
     {
-        return self::createFrom($filename, $directory_path, $is_real_path, $force, $content);
+        return self::createFrom($filename, $directory_path, $force, $content, $recursive);
     }
 
     /**
@@ -123,10 +136,13 @@ trait Create
      * @param string $template_path
      * @param array $replace
      * @param int|null $limit
-     * @param bool $is_real_path
      * @param bool $force
+     * @param bool $recursive
      * @return bool
+     * @throws DirectoryAlreadyExist
+     * @throws FailedOnCreateDirectory
      * @throws FailedOnDeleteFile
+     * @throws FailedOnGetFileContent
      * @throws FailedToCloseStream
      * @throws FailedToOpenStream
      * @throws FailedToWriteFromStream
@@ -134,16 +150,15 @@ trait Create
      * @throws MissingOpenedStream
      * @throws PathNotFound
      * @throws TryCloseNonOpenedStream
-     * @throws FailedOnGetFileContent
      */
     public static function createFromTemplate(
         string $filename,
         string $directory_path,
         string $template_path,
-        array $replace = [],
+        array  $replace = [],
         ?int   $limit = null,
-        bool   $is_real_path = false,
         bool   $force = false,
+        bool   $recursive = false
     ): bool
     {
         $template_path = self::realPath($template_path);
@@ -154,6 +169,6 @@ trait Create
             $content = StrTool::replace($content, $old, $new, $limit ?? -1);
         }
 
-        return self::createFrom($filename, $directory_path, $is_real_path, $force, $content);
+        return self::createFrom($filename, $directory_path, $force, $content, $recursive);
     }
 }

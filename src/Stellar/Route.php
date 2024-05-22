@@ -6,7 +6,7 @@ use Closure;
 use Core\Contracts\RouteInterface;
 use Stellar\Helpers\StrTool;
 use Stellar\Helpers\Typography\Enum\Typography;
-use Stellar\Route\Enums\HttpMethods;
+use Stellar\Route\Enums\HttpMethod;
 use Stellar\Route\Enums\RouteType;
 use Stellar\Route\Exceptions\InvalidNumberOfArguments;
 use Stellar\Route\Traits\BaseMethods;
@@ -29,15 +29,15 @@ class Route implements RouteInterface
     private array $query_parameters;
 
     /**
-     * @param HttpMethods $httpMethods
+     * @param HttpMethod $httpMethods
      * @param string $route
      * @param array|Closure|string $action
      * @throws InvalidNumberOfArguments
      */
     private function __construct(
-        private readonly HttpMethods $httpMethods,
-        string                       $route,
-        array|Closure|string         $action
+        private readonly HttpMethod $httpMethods,
+        string                      $route,
+        array|Closure|string        $action
     )
     {
         $this->route = StrTool::removeIfStartAndFinishWith(

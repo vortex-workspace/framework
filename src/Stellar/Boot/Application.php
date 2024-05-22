@@ -3,12 +3,18 @@
 namespace Stellar\Boot;
 
 use Core\Contracts\Boot\ApplicationInterface;
-use Core\Contracts\Boot\GatewayInterface;
+use Core\Contracts\GatewayInterface;
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
+use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\Local\LocalFilesystemAdapter;
 use Stellar\Boot\Application\Exceptions\InvalidGateway;
 use Stellar\Boot\Application\Exceptions\InvalidProvider;
+use Stellar\Boot\Application\Exceptions\TryRegisterDuplicatedGatewayMethod;
 use Stellar\Boot\Application\Traits\Providers;
+use Stellar\Facades\Log;
+use Stellar\Gateway\Method;
 use Stellar\Helpers\ArrayTool;
 use Stellar\Navigation\Directory;
 use Stellar\Navigation\Enums\ApplicationPath;
@@ -27,6 +33,8 @@ final class Application implements ApplicationInterface
     private static Application $instance;
     private array $commands = [];
     private array $gateways = [];
+    private Filesystem $filesystem;
+    private array $adapters = [];
 
     private function __construct()
     {
@@ -51,6 +59,7 @@ final class Application implements ApplicationInterface
      * @throws PathNotFound
      * @throws PrefixIsEnabledButNotFound
      * @throws RouteNameAlreadyInUse
+     * @throws TryRegisterDuplicatedGatewayMethod
      */
     public static function build(string $root_path, ?string $framework_path = null): void
     {
@@ -59,13 +68,16 @@ final class Application implements ApplicationInterface
             ->setOSSeparator()
             ->tryLoadEnvironment()
             ->discoverGateways()
-            ->loadProviders()
+            ->setErrorHandler()
+            ->loadProvidersFromPackages()
+            ->loadProviders(Setting::get(SettingKey::APP_PROVIDERS->value, []))
             ->loadApplicationRoutes()
             ->closeRoutesDoor();
     }
 
     /**
      * @return Application
+     * @throws TryRegisterDuplicatedGatewayMethod
      * @throws InvalidGateway
      * @throws InvalidSettingException
      */
@@ -76,7 +88,7 @@ final class Application implements ApplicationInterface
                 throw new InvalidGateway($gateway);
             }
 
-            $this->gateways[$gateway::baseInterface()] = $gateway;
+            $this->loadGateway($gateway);
         }
 
         return $this;
@@ -92,17 +104,32 @@ final class Application implements ApplicationInterface
 
         define('FRAMEWORK_PATH', $framework_path);
 
+        $this->filesystem = new Filesystem(new LocalFilesystemAdapter($root_path));
+
         return $this;
     }
 
+    /**
+     * @return Application
+     * @throws PathNotFound
+     */
     private function tryLoadEnvironment(): Application
     {
         try {
-            Dotenv::createImmutable(ApplicationPath::Environment->value)->load();
+            Dotenv::createImmutable(root_path())->load();
         } catch (InvalidPathException) {
         }
 
         return $this;
+    }
+
+    public function getFilesystem(?FilesystemAdapter $adapter = null): Filesystem
+    {
+        if ($adapter !== null) {
+            return new Filesystem($adapter);
+        }
+
+        return $this->filesystem;
     }
 
     /**
@@ -162,12 +189,40 @@ final class Application implements ApplicationInterface
         return $this->commands;
     }
 
-    public function getGatewayByInterface(string $interface): ?string
+    public function getGatewayByAdapter(string $interface, string $method, bool $static = true): ?Method
     {
-        if (!isset($this->gateways[$interface])) {
+        if (!isset($this->gateways[$interface][$static ? 'static' : 'non_static'])) {
             return null;
         }
 
-        return $this->gateways[$interface]::customClass();
+        return $this->gateways[$interface][$static ? 'static' : 'non_static'][$method] ?? null;
+    }
+
+    public function getGateways(): array
+    {
+        return $this->gateways;
+    }
+
+    public function getAdapters(): array
+    {
+        return $this->adapters;
+    }
+
+    /**
+     * @return Application
+     * @throws InvalidSettingException
+     * @throws PathNotFound
+     */
+    private function setErrorHandler(): Application
+    {
+        $error_settings = Setting::get('error');
+
+        ini_set('log_errors', $error_settings['log'] ?? true);
+        ini_set('error_log', Log::getFilename(root_path() . '/storage/logs', Setting::get('logs', [])));
+        error_reporting($error_settings['reporting'] ?? E_ALL);
+        ini_set('display_errors', $error_settings['display'] ?? true);
+
+
+        return $this;
     }
 }

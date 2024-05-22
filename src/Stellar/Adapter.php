@@ -2,59 +2,73 @@
 
 namespace Stellar;
 
-use Stellar\Boot\Application;
+use Closure;
 use Core\Contracts\AdapterInterface;
+use Stellar\Adapter\Exceptions\MethodNotFound;
+use Stellar\Boot\Application;
 
 abstract class Adapter implements AdapterInterface
 {
-    protected static ?string $match_class;
-    protected static object $match_instance;
-
-    abstract public static function relatedInterface(): string;
-
+    /** This is the default class to be called where no Adapters found. */
     abstract public static function defaultClass(): string;
 
-    public static function getMatchClass(): string
+    /**
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     * @throws MethodNotFound
+     */
+    public static function __callStatic(string $name, array $arguments)
     {
-        return self::setMatchClass();
-    }
-
-    private static function setMatchClass(array $gateways = []): string
-    {
-        if (!isset(static::$match_class) || static::$match_class === null) {
-            if (isset($gateways[static::relatedInterface()])) {
-                static::$match_class = $gateways[static::relatedInterface()];
-
-                return static::$match_class;
-            }
-
-            if (($match_class = Application::getInstance()->getGatewayByInterface(static::relatedInterface())) !== null) {
-                static::$match_class = $match_class;
-
-                return static::$match_class;
-            }
-
-            static::$match_class = static::defaultClass();
+        if (method_exists(static::defaultClass(), $name)) {
+            return static::defaultClass()::$name(...$arguments);
         }
 
-        return static::$match_class;
-    }
-
-    public static function getMatchClassObject(array $parameters = [])
-    {
-        if (empty($parameters) && isset(self::$match_instance)) {
-            return self::$match_instance;
+        if (!static::hasGatewayMethod($name)) {
+            throw new MethodNotFound($name);
         }
 
-        return new (static::setMatchClass())(...$parameters);
-    }
+        $method = Application::getInstance()->getGatewayByAdapter(static::class, $name)->callable;
 
-    public static function getMatchClassObjectForProvider(array $parameters = [], array $gateways = [])
-    {
-        if (empty($parameters) && isset(self::$match_instance)) {
-            return self::$match_instance;
+        if ($method instanceof Closure) {
+            return call_user_func_array(Closure::bind($method, null, static::class), $arguments);
         }
 
-        return new (static::setMatchClass($gateways))(...$parameters);
+        return call_user_func_array($method, $arguments);
+    }
+
+    /**
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     * @throws MethodNotFound
+     */
+    public function __call(string $name, array $arguments)
+    {
+        if (method_exists($default = (new (static::defaultClass())), $name)) {
+            return $default->$name(...$arguments);
+        }
+
+        if (!static::hasGatewayMethod($name, false)) {
+            throw new MethodNotFound($name);
+        }
+
+        $method = Application::getInstance()->getGatewayByAdapter(static::class, $name, false)->callable;
+
+        if ($method instanceof Closure) {
+            return call_user_func_array($method->bindTo($this, static::class), $arguments);
+        }
+
+        return call_user_func_array($method, $arguments);
+    }
+
+    /**
+     * @param string $name
+     * @param bool $static
+     * @return bool
+     */
+    public static function hasGatewayMethod(string $name, bool $static = true): bool
+    {
+        return (bool)Application::getInstance()->getGatewayByAdapter(static::class, $name, $static);
     }
 }

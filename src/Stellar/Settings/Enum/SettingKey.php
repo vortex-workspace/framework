@@ -15,6 +15,10 @@ enum SettingKey: string
     case INTERNALS_LANGUAGES = 'internals.languages';
     case INTERNALS_LANGUAGES_FAKER = 'inflector.languages.faker';
     case INTERNALS_LANGUAGES_INFLECTOR = 'internals.languages.inflector';
+    case InternalsHashPasswordAlgorithm = 'internals.hash.password.algorithm';
+    case InternalsHashPasswordBCryptOption = 'internals.hash.password.bcrypt';
+    case InternalsHashPasswordArgon2IOption = 'internals.hash.password.argon2i';
+    case InternalsHashPasswordArgon2IDOption = 'internals.hash.password.argon2id';
     case ROUTE_QUERY_STRICT_MODE = 'route.query.strict_mode';
     case ROUTE_PATHS_OVERWRITE = 'route.paths.overwrite';
     case ROUTE_CUSTOM_ROUTE_FILES = 'route.custom_route_files';
@@ -24,4 +28,7 @@ enum SettingKey: string
     case LOGS_FORMATS_SINGLE = 'logs.formats.single';
     case LOGS_FORMATS_SINGLE_FILENAME = 'logs.formats.single.filename';
     case LOGS_FORMATS_TIMESTAMP = 'logs.formats.timestamp';
+    case StorageDefaultDrive = 'storage.default';
+    case StorageDrives = 'storage.drives';
+    case S3DefaultRegion = 's3.default_region';
 }

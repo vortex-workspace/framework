@@ -11,6 +11,7 @@ use Stellar\Navigation\File\Exceptions\FailedOnCopyFile;
 use Stellar\Navigation\File\Exceptions\FailedOnDeleteFile;
 use Stellar\Navigation\File\Exceptions\TryCopyFileButAlreadyExists;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
+use Stellar\Navigation\Symlink\Exceptions\FailedToDeleteSymlink;
 
 class Directory extends Path
 {
@@ -51,6 +52,7 @@ class Directory extends Path
      * @throws FailedOnDeleteDirectory
      * @throws FailedOnDeleteFile
      * @throws PathNotFound
+     * @throws FailedToDeleteSymlink
      */
     public static function delete(string $directory_path, bool $force = false, bool $is_real_path = false): bool
     {
@@ -70,6 +72,12 @@ class Directory extends Path
             }
 
             foreach ($scan as $single_element) {
+                if (Symlink::isSymlink($single_element, true)) {
+                    Symlink::delete($single_element, true);
+
+                    continue;
+                }
+
                 if (Path::isDirectory($single_element)) {
                     self::delete($single_element, true, true);
                 } else {

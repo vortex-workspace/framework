@@ -22,6 +22,16 @@ class ProjectPath
      * @return string
      * @throws PathNotFound
      */
+    public static function storagePath(?string $additional_path = null): string
+    {
+        return self::mountPath($additional_path, 'storage');
+    }
+
+    /**
+     * @param string|null $additional_path
+     * @return string
+     * @throws PathNotFound
+     */
     public static function vendorPath(?string $additional_path = null): string
     {
         return self::mountPath($additional_path, 'vendor');
@@ -35,6 +45,16 @@ class ProjectPath
     public static function frameworkPath(?string $additional_path = null): string
     {
         return self::mountPath($additional_path, base_path: FRAMEWORK_PATH);
+    }
+
+    /**
+     * @param string|null $additional_path
+     * @return string
+     * @throws PathNotFound
+     */
+    public static function publicPath(?string $additional_path = null): string
+    {
+        return self::mountPath($additional_path, 'public');
     }
 
     /**
