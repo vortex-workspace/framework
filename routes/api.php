@@ -1,5 +1,5 @@
 <?php
 
-\Stellar\Vortex\Route::get('/test', function () {
+Stellar\Route::get('/test', function () {
     dd('aaa');
 })->name('jose');

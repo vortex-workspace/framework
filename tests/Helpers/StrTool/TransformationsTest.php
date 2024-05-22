@@ -4,8 +4,8 @@ namespace Stellar\Tests\Helpers\StrTool;
 
 use PHPUnit\Framework\TestCase;
 use Stellar\Core\Helpers\Typography\Enum\Typography;
+use Stellar\Helpers\StrTool;
 use Stellar\Tests\Helpers\StrTool\Traits\BaseConstants;
-use Stellar\Vortex\Helpers\StrTool;
 
 class TransformationsTest extends TestCase
 {

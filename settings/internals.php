@@ -1,7 +1,7 @@
 <?php
 
-use Stellar\Vortex\Facades\Faker\Enum\Locale;
-use Stellar\Vortex\Helpers\StrTool\Enum\Language as InflectorLanguage;
+use Stellar\Facades\Faker\Enum\Locale;
+use Stellar\Helpers\StrTool\Enum\Language as InflectorLanguage;
 
 return [
     'languages' => [

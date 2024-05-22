@@ -1,7 +1,7 @@
 <?php
 
-use Stellar\Vortex\Boot\Application;
-use Stellar\Vortex\Cosmo\Cosmo;
+use Stellar\Boot\Application;
+use Stellar\Cosmo\Cosmo;
 
 require_once __DIR__ . '/vendor/autoload.php';
 

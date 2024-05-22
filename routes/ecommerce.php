@@ -1,5 +1,5 @@
 <?php
 
-\Stellar\Vortex\Route::get('checkout', function () {
+Stellar\Route::get('checkout', function () {
    dd('a');
 });
