@@ -8,8 +8,8 @@ use Override;
 use Stellar\Request;
 use Stellar\Request\Validations\Rule;
 use Stellar\Request\Validations\Rules\DateRule\Exceptions\InvalidDateFormatException;
+use Stellar\Setting;
 use Stellar\Settings\Enum\SettingKey;
-use Stellar\Settings\Setting;
 
 class DateRule extends Rule
 {

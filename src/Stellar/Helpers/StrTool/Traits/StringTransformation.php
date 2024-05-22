@@ -28,6 +28,16 @@ trait StringTransformation
 
     /**
      * @param string $string
+     * @param string $force_string
+     * @return string
+     */
+    public static function forceWrapWith(string $string, string $force_string): string
+    {
+        return self::forceFinishWith(self::forceStartWith($string, $force_string), $force_string);
+    }
+
+    /**
+     * @param string $string
      * @param array $delimiters
      * @param Language|null $language
      * @return string

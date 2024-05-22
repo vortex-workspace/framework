@@ -1,5 +1,5 @@
 {
-  "name": "vortex-workspace/vortex-framework",
+  "name": "vortex-workspace/framework",
   "description": "",
   "minimum-stability": "stable",
   "license": "MIT",
@@ -44,6 +44,7 @@
     }
   },
   "autoload-dev": {
+    "files": ["src/Stellar/Alias/main.php"],
     "psr-4": {
       "Stellar\\Tests\\": "tests/"
     }

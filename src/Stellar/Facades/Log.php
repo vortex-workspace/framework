@@ -15,7 +15,7 @@ use Stellar\Navigation\Helpers\Path;
 use Stellar\Navigation\Path\Exceptions\FailedOnDeleteException;
 use Stellar\Navigation\Path\Exceptions\PathNotFoundException;
 use Stellar\Navigation\Path\Exceptions\TypeNotMatchException;
-use Stellar\Settings\Setting;
+use Stellar\Setting;
 
 class Log
 {

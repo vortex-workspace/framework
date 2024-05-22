@@ -1,15 +1,11 @@
 ## Summary
 - [Gateway](#Gateway)
 - [Provider](#Provider)
-- [Cosmo](#Cosmo)
-  - [Command](#Command)
-    - [Permissions](#Permissions)
-      - [CanRun](#CanRun)
-      - [CanSee](#CanSee)
-      - [Can](#Can)
-    - [Arguments](#Arguments)
-    - [Options](#Options)
-    - [Bells](#Bells)
+- [Helpers](#Helpers)
+  - [Navigation](#Navigation)
+    - [File](#File)
+    - [Directory](#Directory)
+    - [Symlink](#Symlink)
 - [Request](#Request)
 
 ## Gateway
@@ -55,189 +51,13 @@ class RequestGateway extends Gateway
 
 ## Provider
 
-## Cosmo
+## Helpers
 
-### Command
-Commands allow developers to automate common tasks such as deployment, installation, and others. In the Vortex
-application, there are two methods to register commands: either by creating the command class inside the
-``app/commands`` directory or by creating a new ``Adapter`` and specifying the commands to be registered. To generate a 
-new command, utilize the following Cosmo command and specify the desired command name.
+### Navigation
+#### File
 
-```shell
-php cosmo make:command ${COMMAND_NAME}
-```
-
-Command classes require set the ``name()`` and the ``handle()`` methods. The first is the name of our command and need
-return a string, and the last is the code that must be executed where the command be called, and need return an object
-of type ``CommandReturnStatus``.
-
-```php
-<?php
-
-use Stellar\Core\Cosmo\Console\Enums\CommandReturnStatus;use Stellar\Cosmo\Command; 
-      
-class ProjectInstall extends Command  
-{  
-    protected function name(): string
-    {
-        return 'project:install';
-    }
-
-    protected function handle(): CommandReturnStatus
-    {
-        // Code to install project
-        
-        return CommandReturnStatus::SUCCESS;
-    }
-}
-```
-
-#### Permissions
-
-##### CanRun()
-
-To determine whether a command can be executed or not, the static method ``canRun()`` is used, which takes the instance
-of
-the Application class as a parameter, as in the example below. This method should return a boolean value.
-
-```php
-<?php
-
-use Stellar\Cosmo\Command;  
-      
-class ProjectInstall extends Command  
-{  
-    public static function canRun(Application $application): bool 
-    {  
-        return true;
-    }
-}
-```
-
-##### CanSee()
-
-Similarly, but controlling the visibility of a command, the static method ``canSee()`` should be used. It also takes an
-instance of the Application class as a parameter and should return a boolean value. Note that this method will only
-block visibility, allowing the command to be executed but not listed.
-
-```php
-<?php
-
-use Stellar\Cosmo\Command;  
-      
-class ProjectInstall extends Command  
-{  
-    public static function canSee(Application $application): bool 
-    {  
-        return true;
-    }
-}
-```
-
-##### Can()
-
-For an upper level control, the static method ``can()`` will both block visibility and execution permission, our
-structure and functionality are similar to earlier methods.
-
-```php
-<?php
-
-use Stellar\Cosmo\Command;  
-      
-class ProjectInstall extends Command  
-{  
-    public static function can(Application $application): bool 
-    {  
-        return true;
-    }
-}
-```
-
-#### Arguments
-
-To add arguments for our command, you need set the protected method ``arguments()`` in the command class. This method
-need return an array of Arguments objects.
-
-```php
-<?php
-
-use Stellar\Cosmo\Argument;use Stellar\Cosmo\Command;  
-      
-class ProjectInstall extends Command  
-{  
-    protected function arguments(): array  
-    {  
-        return [  
-            Argument::make('model'),  
-        ];  
-    }
-}
-```
-
-#### Options
-
-Options are similar to arguments, but you set the protected method ``options()`` in the command class and return an
-array of Options objects.
-
-```php
-<?php
-
-use Stellar\Cosmo\Command;use Stellar\Cosmo\Option;  
-      
-class ProjectInstall extends Command  
-{  
-    protected function options(): array  
-    {  
-        return [  
-            Option::make('model'),  
-        ];  
-    }
-}
-```
-
-``OBS``: The Argument and Option classes can be created with default ``new`` constructor or with the aliases ``make()``
-method.
-
-#### Bells
-In additional Command class has some bells to customize the experience on run and debug commands. To display the command
-runtime in the end of command, just set the method ``withRuntime()`` to return true. By default, this is enabled.
-
-```php
-<?php
-
-use Stellar\Cosmo\Command;  
-      
-class ProjectInstall extends Command  
-{  
-    protected function withRuntime() : bool
-    {
-        return true;
-    }
-}
-```
-
-Another feature is the change counter, which will show the total count of changes at the end of command execution. It is 
-the developer's responsibility to specify the points at which the count will be incremented using the method 
-``addChange()`` than can receive an boolean or Closure by parameter to determine if the change will be counted, as shown 
-below:
-
-```php
-<?php
-
-use Stellar\Core\Cosmo\Console\Enums\CommandReturnStatus;use Stellar\Cosmo\Command;
-      
-class ProjectInstall extends Command  
-{  
-    protected function handle() : CommandReturnStatus
-    {
-        for ($i = 0; $i < 100; $i++) {
-            $this->addChange(fn() => $i > 5);
-        }
-        
-        return CommandReturnStatus::SUCCESS;
-    }
-}
-```
+#### Directory
+#### Symlink
 
 ## Request
 Classes Request are responsible for grouping and abstracting the data and information necessary in a request, such as 

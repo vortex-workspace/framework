@@ -2,7 +2,7 @@
 
 namespace Stellar;
 
-use Stellar\Core\Contracts\RequestInterface;
+use Core\Contracts\RequestInterface;
 use Stellar\Request\Traits\Getters;
 use Stellar\Request\Traits\Server;
 use Stellar\Request\Traits\Setters;

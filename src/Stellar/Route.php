@@ -3,7 +3,7 @@
 namespace Stellar;
 
 use Closure;
-use Stellar\Core\Contracts\RouteInterface;
+use Core\Contracts\RouteInterface;
 use Stellar\Helpers\StrTool;
 use Stellar\Helpers\Typography\Enum\Typography;
 use Stellar\Route\Enums\HttpMethods;

@@ -2,7 +2,7 @@
 
 namespace Stellar\Request;
 
-use Stellar\Core\Contracts\Request\ValidationInterface;
+use Core\Contracts\Request\ValidationInterface;
 use Stellar\Request;
 use Stellar\Request\Validations\Rule;
 use Stellar\Request\Validations\Traits\Getters;
