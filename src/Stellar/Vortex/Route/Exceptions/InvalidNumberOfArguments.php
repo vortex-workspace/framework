@@ -1,0 +1,21 @@
+<?php
+
+namespace Stellar\Vortex\Route\Exceptions;
+
+use Monolog\Level;
+use Stellar\Vortex\Throwable\Exceptions\Contracts\Exception;
+use Stellar\Vortex\Throwable\Exceptions\Enum\ExceptionCode;
+use Throwable;
+
+class InvalidNumberOfArguments extends Exception
+{
+    public function __construct(string $route, ?Throwable $previous = null)
+    {
+        parent::__construct(
+            "The route $route must be an array with controller and method, or a callable.",
+            ExceptionCode::DEVELOPER_EXCEPTION,
+            Level::Error,
+            $previous
+        );
+    }
+}

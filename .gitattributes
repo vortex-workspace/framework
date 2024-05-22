@@ -1,0 +1,10 @@
+/cosmo                    export-ignore
+/.phpunit.cache           export-ignore
+/.phpunit.cache/**        export-ignore
+/migrations               export-ignore
+/.gitignore               export-ignore
+/.gitattributes           export-ignore
+/tests                    export-ignore
+/tests/**                 export-ignore
+/phpunit.xml              export-ignore
+/.env.example             export-ignore

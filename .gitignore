@@ -1,0 +1,7 @@
+/vendor
+/vendor/**
+/.phpunit.cache
+/.phpunit.cache/**
+/.idea
+/.idea/**
+/.env
