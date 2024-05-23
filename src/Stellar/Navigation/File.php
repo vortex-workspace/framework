@@ -88,7 +88,7 @@ class File extends Path
      * @param string|null $custom_filename
      * @param bool $is_real_path
      * @param bool $recursive
-     * @param bool $overwrite_where_exists
+     * @param bool $force
      * @return bool
      * @throws DirectoryAlreadyExist
      * @throws FailedOnCopyFile
@@ -102,7 +102,7 @@ class File extends Path
         ?string $custom_filename = null,
         bool    $is_real_path = false,
         bool    $recursive = false,
-        bool    $overwrite_where_exists = false
+        bool    $force = false
     ): bool
     {
         if (!$is_real_path) {
@@ -118,7 +118,7 @@ class File extends Path
                 basename($file_path) :
                 StrTool::removeIfStartAndFinishWith($custom_filename, '/'));
 
-        if (self::exist($final_path) && $overwrite_where_exists === false) {
+        if (self::exist($final_path) && $force === false) {
             throw new TryCopyFileButAlreadyExists($file_path, $final_path);
         }
 

@@ -3,6 +3,7 @@
 namespace Stellar\Providers;
 
 use Stellar\AdapterAlias;
+use Stellar\Commands\PublishSettings;
 use Stellar\Provider;
 use Stellar\Storage;
 
@@ -10,7 +11,9 @@ class VortexCore extends Provider
 {
     public static function commands(): array
     {
-        return [];
+        return [
+            PublishSettings::class,
+        ];
     }
 
     public static function routes(): array

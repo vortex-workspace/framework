@@ -36,6 +36,7 @@ final class Application implements ApplicationInterface
     private array $gateways = [];
     private Filesystem $filesystem;
     private array $adapters = [];
+    private array $setting_files = [];
 
     private function __construct()
     {
@@ -85,7 +86,7 @@ final class Application implements ApplicationInterface
      */
     private function discoverGateways(): Application
     {
-        foreach (Setting::get(SettingKey::APP_GATEWAYS->value) as $gateway) {
+        foreach (Setting::get(SettingKey::APP_GATEWAYS->value, []) as $gateway) {
             if (!((new $gateway) instanceof GatewayInterface)) {
                 throw new InvalidGateway($gateway);
             }

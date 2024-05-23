@@ -2,10 +2,6 @@
 
 namespace Stellar\Composer;
 
-if (!defined('ROOT_PATH')) {
-    define('ROOT_PATH', __DIR__ . '/../../..');
-}
-
 if (!defined('OS_SEPARATOR')) {
     define('OS_SEPARATOR', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? '\\' : '/');
 }
@@ -13,6 +9,8 @@ if (!defined('OS_SEPARATOR')) {
 use Composer\Script\Event;
 use Stellar\Facades\Collection;
 use Stellar\Navigation\Directory;
+use Stellar\Navigation\Directory\Exceptions\DirectoryAlreadyExist;
+use Stellar\Navigation\Directory\Exceptions\FailedOnCreateDirectory;
 use Stellar\Navigation\File;
 use Stellar\Navigation\File\Exceptions\FailedOnDeleteFile;
 use Stellar\Navigation\File\Exceptions\FailedOnGetFileContent;
@@ -31,6 +29,8 @@ class Package
     /**
      * @param Event $event
      * @return void
+     * @throws DirectoryAlreadyExist
+     * @throws FailedOnCreateDirectory
      * @throws FailedOnDeleteFile
      * @throws FailedOnGetFileContent
      * @throws FailedToCloseStream
@@ -46,12 +46,19 @@ class Package
         $vendor_path = $event->getComposer()->getConfig()->get('vendor-dir');
         $autoload_path = "$vendor_path/autoload.php";
 
+        if (!defined('ROOT_PATH')) {
+            define('ROOT_PATH', "$vendor_path/..");
+        }
+
+        if (!defined('FRAMEWORK_PATH')) {
+            define('FRAMEWORK_PATH', ROOT_PATH . '/vendor/vortex-workspace/framework');
+        }
+
         if (!is_file($autoload_path)) {
             return;
         }
 
         require $autoload_path;
-
         $workspaces = Directory::recursiveScan(
             $vendor_path,
             return_full_path: false,
@@ -86,9 +93,10 @@ class Package
         File::createFromTemplate(
             'providers.php',
             storage_path() . '/internals/cache/packages',
-            root_path('stubs/base_array.php'),
+            framework_path('stubs/base_array.php'),
             ['$array' => var_export($providers->toArray(), true)],
-            force: true
+            force: true,
+            recursive: true
         );
     }
 }
