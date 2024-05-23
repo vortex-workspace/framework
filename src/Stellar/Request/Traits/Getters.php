@@ -4,19 +4,27 @@ namespace Stellar\Request\Traits;
 
 trait Getters
 {
-    private const string ALL_METHOD = 'all';
-    private const string COOKIE_METHOD = 'cookies';
-    private const string ATTRIBUTE_METHOD = 'attributes';
-    private const string QUERY_PARAMETER_METHOD = 'query_parameters';
-    private const string FILE_METHOD = 'files';
-
     /**
      * @param string|array|null $keys
      * @return mixed
      */
-    public static function get(string|array|null $keys = null): mixed
+    public static function get(string|array $keys = null): mixed
     {
-        return self::getStaticAttributes($keys, self::ALL_METHOD);
+        if (!is_array($keys)) {
+            return self::$attributes[$keys];
+        }
+
+        if (empty($keys)) {
+            return null;
+        }
+
+        $values = [];
+
+        foreach ($keys as $key) {
+            $values[$key] = self::$attributes[$key] ?? null;
+        }
+
+        return $values;
     }
 
     /**
@@ -25,7 +33,7 @@ trait Getters
      */
     public static function getAttributes(array|string|null $attributes = null): mixed
     {
-        return self::getStaticAttributes($attributes, self::ATTRIBUTE_METHOD);
+        return self::getStaticAttributes($attributes, self::$attributes);
     }
 
     /**
@@ -34,7 +42,7 @@ trait Getters
      */
     public static function getQueryParameters(array|string|null $parameters = null): mixed
     {
-        return self::getStaticAttributes($parameters, self::QUERY_PARAMETER_METHOD);
+        return self::getStaticAttributes($parameters, self::$query_parameters);
     }
 
     /**
@@ -43,7 +51,7 @@ trait Getters
      */
     public static function getCookies(array|string|null $cookies = null): mixed
     {
-        return self::getStaticAttributes($cookies, self::COOKIE_METHOD);
+        return self::getStaticAttributes($cookies, self::$cookies);
     }
 
     /**
@@ -52,21 +60,21 @@ trait Getters
      */
     public static function getFiles(array|string|null $files = null): mixed
     {
-        return self::getStaticAttributes($files, self::FILE_METHOD);
+        return self::getStaticAttributes($files, self::$files);
     }
 
     /**
      * @param array|string|null $parameters
-     * @param string $attribute
+     * @param array|null $attribute
      * @return mixed
      */
-    private static function getStaticAttributes(array|string|null $parameters, string $attribute): mixed
+    private static function getStaticAttributes(array|string|null $parameters, ?array $attribute): mixed
     {
-        if (self::$$attribute === null) {
-            new self();
+        if ($attribute === null) {
+            return null;
         }
 
-        $attributes_copy = self::unsetProperties(self::$$attribute);
+        $attributes_copy = self::unsetProperties($attribute);
 
         if ($parameters === null) {
             return $attributes_copy;
