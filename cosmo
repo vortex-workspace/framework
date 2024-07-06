@@ -1,10 +1,16 @@
 <?php
 
 use Cosmo\ConsoleIgnition;
-use Stellar\Boot\Application;
+use Stellar\Boot\ApplicationBuilder;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-Application::build(__DIR__, __DIR__ . '/src');
+
+$_SERVER['REQUEST_URI'] = 'aaa/web/test/1000';
+$_SERVER['REQUEST_METHOD'] = 'GET';
+
+$applicationBuilder = new ApplicationBuilder(__DIR__, __DIR__ . '/src');
+$application = $applicationBuilder->build()->createApp();
+$application->run();
 
 ConsoleIgnition::boot();
