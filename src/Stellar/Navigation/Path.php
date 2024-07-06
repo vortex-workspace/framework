@@ -121,4 +121,24 @@ class Path
 
         return is_link($path);
     }
+
+    /**
+     * - Return directory path with correct OS separator.
+     * @param array $trace
+     * @return string|null
+     */
+    public static function mountPath(array $trace): ?string
+    {
+        if (empty($trace)) {
+            return null;
+        }
+
+        $path = '';
+
+        foreach ($trace as $single) {
+            $path .= DIRECTORY_SEPARATOR . StrTool::removeIfStartAndFinishWith($single, ['/', '\\']);
+        }
+
+        return $path;
+    }
 }

@@ -9,6 +9,8 @@ use Dotenv\Exception\InvalidPathException;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\Local\LocalFilesystemAdapter;
+use Stellar\Adapters\RequestAdapter;
+use Stellar\Boot\Application\Exceptions\DuplicatedAdapter;
 use Stellar\Boot\Application\Exceptions\InvalidGateway;
 use Stellar\Boot\Application\Exceptions\InvalidProvider;
 use Stellar\Boot\Application\Exceptions\TryRegisterDuplicatedGatewayMethod;
@@ -19,7 +21,9 @@ use Stellar\Helpers\ArrayTool;
 use Stellar\Navigation\Directory;
 use Stellar\Navigation\Enums\ApplicationPath;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
+use Stellar\Request;
 use Stellar\Route\Exceptions\RouteNameAlreadyInUse;
+use Stellar\RouteDriver;
 use Stellar\Router;
 use Stellar\Router\Exceptions\PrefixIsEnabledButNotFound;
 use Stellar\Setting;
@@ -35,6 +39,7 @@ final class Application implements ApplicationInterface
     private array $gateways = [];
     private Filesystem $filesystem;
     private array $adapters = [];
+    private array $setting_files = [];
 
     private function __construct()
     {
@@ -60,6 +65,7 @@ final class Application implements ApplicationInterface
      * @throws PrefixIsEnabledButNotFound
      * @throws RouteNameAlreadyInUse
      * @throws TryRegisterDuplicatedGatewayMethod
+     * @throws DuplicatedAdapter
      */
     public static function build(string $root_path, ?string $framework_path = null): void
     {
@@ -72,7 +78,13 @@ final class Application implements ApplicationInterface
             ->loadProvidersFromPackages()
             ->loadProviders(Setting::get(SettingKey::APP_PROVIDERS->value, []))
             ->loadApplicationRoutes()
-            ->closeRoutesDoor();
+            ->closeRoutesDoor()
+            ->callRouteDriver();
+    }
+
+    public function callRouteDriver(): void
+    {
+        RouteDriver::discover();
     }
 
     /**
@@ -83,7 +95,7 @@ final class Application implements ApplicationInterface
      */
     private function discoverGateways(): Application
     {
-        foreach (Setting::get(SettingKey::APP_GATEWAYS->value) as $gateway) {
+        foreach (Setting::get(SettingKey::APP_GATEWAYS->value, []) as $gateway) {
             if (!((new $gateway) instanceof GatewayInterface)) {
                 throw new InvalidGateway($gateway);
             }
@@ -141,7 +153,13 @@ final class Application implements ApplicationInterface
      */
     private function loadApplicationRoutes(): Application
     {
-        $route_files = Directory::scan(root_path(ApplicationPath::Routes->value), exclude_parents: true);
+        $route_files = [];
+
+        try {
+            $route_files = Directory::scan(root_path(ApplicationPath::Routes->value), exclude_parents: true);
+        } catch (PathNotFound) {
+
+        }
 
         try {
             require_once root_path(ApplicationPath::Routes->additionalPath('web.php'));
@@ -170,9 +188,11 @@ final class Application implements ApplicationInterface
         $this->commands = array_merge($this->commands, $commands);
     }
 
-    private function closeRoutesDoor(): void
+    private function closeRoutesDoor(): Application
     {
         Router::getInstance()->disableEntrance();
+
+        return $this;
     }
 
     private function setOSSeparator(): Application

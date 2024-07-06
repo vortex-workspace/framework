@@ -17,6 +17,7 @@ class Router implements RouterInterface
     private static self $instance;
     private array $route_names = [];
     private bool $enable_entrance = true;
+    private ?Route $fallback = null;
 
     public static function getInstance(): Router
     {
@@ -25,6 +26,17 @@ class Router implements RouterInterface
         }
 
         return self::$instance;
+    }
+
+    /**
+     * @param Route $route
+     * @return void
+     * @throws FailedOnTryAddRoute
+     */
+    public static function addFallbackRoute(Route &$route): void
+    {
+        self::addRoute($route);
+        self::getInstance()->fallback = $route;
     }
 
     /**
@@ -48,9 +60,7 @@ class Router implements RouterInterface
     public static function flushRoutes(): void
     {
         $router = self::getInstance();
-
         $router->routes = array_merge_recursive($router->routes, $router->screening_routes);
-
         $router->screening_routes = [];
     }
 
@@ -225,5 +235,10 @@ class Router implements RouterInterface
         $this->prefixed_routes[$method][$group_prefix ?
             "$group_prefix/{$route->getPrefixedRoute()}" :
             $route->getPrefixedRoute()] = $route;
+    }
+
+    public function getFallbackRoute(): ?Route
+    {
+        return $this->fallback;
     }
 }

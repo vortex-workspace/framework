@@ -4,6 +4,11 @@ namespace Stellar;
 
 use Closure;
 use Core\Contracts\RouteInterface;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionFunction;
+use ReflectionNamedType;
+use ReflectionParameter;
 use Stellar\Helpers\StrTool;
 use Stellar\Helpers\Typography\Enum\Typography;
 use Stellar\Route\Enums\HttpMethod;
@@ -27,19 +32,24 @@ class Route implements RouteInterface
     private ?string $prefix = null;
     private Closure $action;
     private array $query_parameters;
+    private array $bind_parameters = [];
+    private bool $is_fallback;
 
     /**
      * @param HttpMethod $httpMethods
      * @param string $route
      * @param array|Closure|string $action
+     * @param bool $is_fallback
      * @throws InvalidNumberOfArguments
      */
     private function __construct(
         private readonly HttpMethod $httpMethods,
         string                      $route,
-        array|Closure|string        $action
+        array|Closure|string        $action,
+        bool $is_fallback = false
     )
     {
+        $this->is_fallback = $is_fallback;
         $this->route = StrTool::removeIfStartAndFinishWith(
             $route,
             [Typography::Slash->value, Typography::Backslash->value]
@@ -124,7 +134,7 @@ class Route implements RouteInterface
 
     /**
      *  - Note: Use this method in conjunct to route.query.strict_mode setting to populate request with only specific
-     *  parameters
+     *  query parameters
      * @param array $parameters
      * @return $this
      */
@@ -150,5 +160,82 @@ class Route implements RouteInterface
     public function getPrefixedRoute(): string
     {
         return $this->prefix !== null ? "$this->prefix/$this->route" : $this->route;
+    }
+
+    public function setBindParameters(array $bind_parameters): static
+    {
+        $this->bind_parameters = $bind_parameters;
+
+        return $this;
+    }
+
+    public function getBindParameters(): array
+    {
+        return $this->bind_parameters;
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public function call()
+    {
+        if (isset($this->controller)) {
+            $reflection = new ReflectionClass($this->controller);
+            $method = $reflection->getMethod($this->method);
+            $parameters = $this->mountBindParameters($method->getParameters());
+            return $this->controller::{$this->method}(...$parameters);
+        }
+
+        $reflection = new ReflectionFunction($this->action);
+        $parameters = $this->mountBindParameters($reflection->getParameters());
+        return call_user_func_array($this->action, $parameters);
+    }
+
+    private function mountBindParameters(array $parameters): array
+    {
+        $bind_parameters = [];
+
+        /** @var ReflectionParameter $parameter */
+        foreach ($parameters as $parameter) {
+            $type = $parameter->getType();
+            $parameter_name = $parameter->getName();
+
+            if ($type instanceof ReflectionNamedType) {
+                $type_name = $type->getName();
+
+                if ($type_name === Request::class) {
+                    $bind_parameters[$parameter_name] = new Request();
+                    continue;
+                }
+            }
+
+            if (isset($this->bind_parameters[$parameter_name])) {
+                $bind_parameters[$parameter_name] = $this->bind_parameters[$parameter_name];
+            }
+        }
+
+        return $bind_parameters;
+    }
+
+    /**
+     * @param string $route
+     * @param array|callable|string $action
+     * @return Route
+     * @throws InvalidNumberOfArguments
+     */
+    public static function fallback(string $route, array|callable|string $action): Route
+    {
+        $route = new Route(HttpMethod::GET, $route, $action, true);
+
+        $route->setOriginGroup(self::getOriginFromBacktrace(debug_backtrace()));
+
+        Router::addFallbackRoute($route);
+
+        return $route;
+    }
+
+    public function isFallback(): bool
+    {
+        return $this->is_fallback;
     }
 }

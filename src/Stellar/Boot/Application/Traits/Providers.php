@@ -48,6 +48,7 @@ trait Providers
     private function loadProviderSettings(Provider $provider): void
     {
         foreach ($provider::settings() as $setting) {
+            $this->setting_files[$provider::class][$setting] = $setting;
             Setting::uploadFileSetting($setting);
         }
     }
@@ -167,5 +168,10 @@ trait Providers
         $default_method = "public static function defaultClass(): string{return '$adapterAlias->default_class';}";
         eval("namespace $adapterAlias->namespace { class $adapterAlias->class_name extends \Stellar\Adapter { $default_method }}");
         $this->adapters[$full_class] = $adapterAlias;
+    }
+
+    public function getSettingFiles(): array
+    {
+        return $this->setting_files;
     }
 }
