@@ -3,6 +3,7 @@
 namespace Stellar\Boot;
 
 use Core\Contracts\Boot\ApplicationBuilderInterface;
+use Core\Contracts\Boot\ApplicationInterface;
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
 use Stellar\Boot\ApplicationBuilder\Exceptions\MissingEnvironmentFileException;
@@ -10,7 +11,6 @@ use Stellar\Boot\ApplicationBuilder\Traits\PathsDefinitionTrait;
 use Stellar\Boot\ApplicationBuilder\Traits\RegisterInjectionsTrait;
 use Stellar\Boot\ApplicationBuilder\Traits\RegisterServicesTrait;
 use Stellar\Navigation\Directory;
-use Stellar\Navigation\File\Exceptions\FailedOnGetFileContent;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
 use Stellar\Throwable\Exceptions\Generics\InvalidClassProvidedException;
 
@@ -29,9 +29,8 @@ final class ApplicationBuilder implements ApplicationBuilderInterface
 
     /**
      * @return ApplicationBuilder
-     * @throws MissingEnvironmentFileException
-     * @throws FailedOnGetFileContent
      * @throws InvalidClassProvidedException
+     * @throws MissingEnvironmentFileException
      */
     public function build(): ApplicationBuilder
     {
@@ -42,9 +41,9 @@ final class ApplicationBuilder implements ApplicationBuilderInterface
             ->registerInjections();
     }
 
-    public function createApp()
+    public function createApp(): ApplicationInterface
     {
-
+        return Application::getInstance();
     }
 
     /**

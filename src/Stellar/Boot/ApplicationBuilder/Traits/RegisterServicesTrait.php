@@ -4,23 +4,18 @@ namespace Stellar\Boot\ApplicationBuilder\Traits;
 
 use Core\Contracts\ServiceInterface;
 use Stellar\Boot\ApplicationBuilder;
-use Stellar\Navigation\File;
-use Stellar\Navigation\File\Exceptions\FailedOnGetFileContent;
 use Stellar\Navigation\Path;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
-use Stellar\Services\AbstractRouteService;
 use Stellar\Setting;
 use Stellar\Settings\Exceptions\InvalidSettingException;
 use Stellar\Throwable\Exceptions\Generics\InvalidClassProvidedException;
 
 trait RegisterServicesTrait
 {
-    private AbstractRouteService $abstractRouteService;
     private array $services = [];
 
     /**
      * @return ApplicationBuilder
-     * @throws FailedOnGetFileContent
      * @throws InvalidClassProvidedException
      */
     private function registerServices(): ApplicationBuilder
@@ -46,7 +41,7 @@ trait RegisterServicesTrait
     private function loadServices(array $services): void
     {
         foreach ($services as $base_class => $service) {
-            if (!($service::getInstance() instanceof ServiceInterface)) {
+            if (!($implements = class_implements($service)) || !in_array(ServiceInterface::class, $implements)) {
                 throw new InvalidClassProvidedException($service, ServiceInterface::class);
             }
 
@@ -56,13 +51,12 @@ trait RegisterServicesTrait
 
     /**
      * @return void
-     * @throws FailedOnGetFileContent
      * @throws InvalidClassProvidedException
      */
     private function registerPackagesServices(): void
     {
         try {
-            $services = File::get(storage_path(Path::mountPath(['internals', 'cache', 'packages', 'services.php'])));
+            $services = require_once storage_path(Path::mountPath(['internals', 'cache', 'packages', 'services.php']));
         } catch (PathNotFound) {
             $services = [];
         }

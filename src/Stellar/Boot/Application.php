@@ -55,9 +55,8 @@ final class Application implements ApplicationInterface
     }
 
     /**
-     * @param string $root_path
-     * @param string|null $framework_path
      * @return void
+     * @throws DuplicatedAdapter
      * @throws InvalidGateway
      * @throws InvalidProvider
      * @throws InvalidSettingException
@@ -65,14 +64,10 @@ final class Application implements ApplicationInterface
      * @throws PrefixIsEnabledButNotFound
      * @throws RouteNameAlreadyInUse
      * @throws TryRegisterDuplicatedGatewayMethod
-     * @throws DuplicatedAdapter
      */
-    public static function build(string $root_path, ?string $framework_path = null): void
+    public function run(): void
     {
         self::getInstance()
-            ->setRootPaths($root_path, $framework_path)
-            ->setOSSeparator()
-            ->tryLoadEnvironment()
             ->discoverGateways()
             ->setErrorHandler()
             ->loadProvidersFromPackages()
