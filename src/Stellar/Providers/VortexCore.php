@@ -4,6 +4,7 @@ namespace Stellar\Providers;
 
 use Stellar\AdapterAlias;
 use Stellar\Commands\PublishSettings;
+use Stellar\Commands\RouteList;
 use Stellar\Provider;
 use Stellar\Storage;
 
@@ -13,6 +14,7 @@ class VortexCore extends Provider
     {
         return [
             PublishSettings::class,
+            RouteList::class,
         ];
     }
 

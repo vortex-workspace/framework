@@ -24,4 +24,14 @@ return [
      * List all Gateways that need overwrite in application
      */
     'gateways' => [],
+    /**
+     * List services to be used in application.
+     * Warning: Some services are required, if any be provided, the default services will be used.
+     */
+    'services' => [
+        \Stellar\Services\AbstractRouteService::class => \Stellar\Services\ControllerRouteService::class
+    ],
+    'injections' => [
+
+    ]
 ];
