@@ -176,7 +176,7 @@ trait BaseMethods
     private static function getOriginFromBacktrace(array $backtrace): string
     {
         return StrTool::of($backtrace[0]['file'])
-            ->afterLast(OS_SEPARATOR)
+            ->afterLast(DIRECTORY_SEPARATOR)
             ->substring(0, -4)->get();
     }
 }

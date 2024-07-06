@@ -110,7 +110,7 @@ class Setting
     public static function uploadFileSetting(string $full_path, ?string $setting_key = null): void
     {
         if ($setting_key === null) {
-            $setting_key = StrTool::of($full_path)->afterLast(OS_SEPARATOR)->substring(0, -4)->get();
+            $setting_key = StrTool::of($full_path)->afterLast(DIRECTORY_SEPARATOR)->substring(0, -4)->get();
         }
 
         self::updateSettings($setting_key, require_once($full_path));

@@ -73,11 +73,11 @@ class ProjectPath
         $path = $base_path;
 
         if ($root_relative_path !== null) {
-            $path .= StrTool::forceStartWith($root_relative_path, OS_SEPARATOR);
+            $path .= StrTool::forceStartWith($root_relative_path, DIRECTORY_SEPARATOR);
         }
 
         if ($additional_path !== null) {
-            $path .= StrTool::forceStartWith($additional_path, OS_SEPARATOR);
+            $path .= StrTool::forceStartWith($additional_path, DIRECTORY_SEPARATOR);
         }
         return Path::realPath($path);
     }

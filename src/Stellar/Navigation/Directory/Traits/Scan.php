@@ -16,6 +16,7 @@ trait Scan
      * @param bool $key_as_path
      * @param bool $return_full_path
      * @param bool $exclude_parents
+     * @param bool $include_root
      * @return bool|array
      * @throws PathNotFound
      */
@@ -25,7 +26,7 @@ trait Scan
         bool         $is_real_path = false,
         bool         $key_as_path = false,
         bool         $return_full_path = false,
-        bool         $exclude_parents = false,
+        bool         $exclude_parents = true,
         bool         $include_root = false
     ): bool|array
     {
