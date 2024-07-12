@@ -164,7 +164,7 @@ class Router implements RouterInterface
      */
     public function updateRoutesWithPrefix(): static
     {
-        $custom_route_files = Setting::get(SettingKey::ROUTE_CUSTOM_ROUTE_FILES->value);
+        $custom_route_files = Setting::get(SettingKey::RouteFiles->value);
 
         foreach ($this->routes as $methods_routes) {
             foreach ($methods_routes as $method => $method_routes) {

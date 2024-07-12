@@ -4,8 +4,10 @@ namespace Stellar\Boot\ApplicationBuilder\Traits;
 
 use Core\Contracts\InjectionInterface;
 use Stellar\Boot\ApplicationBuilder;
+use Stellar\Navigation\File;
 use Stellar\Navigation\Path;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
+use Stellar\Navigation\ProjectPath;
 use Stellar\Setting;
 use Stellar\Settings\Exceptions\InvalidSettingException;
 use Stellar\Throwable\Exceptions\Generics\InvalidClassProvidedException;
@@ -17,6 +19,7 @@ trait RegisterInjectionsTrait
     /**
      * @return ApplicationBuilder
      * @throws InvalidClassProvidedException
+     * @throws PathNotFound
      */
     private function registerInjections(): ApplicationBuilder
     {
@@ -28,7 +31,7 @@ trait RegisterInjectionsTrait
 
     private function addInjection(string $injection): static
     {
-        $this->injections[$injection] = $injection;
+        $this->injections[get_parent_class($injection)] = $injection;
 
         return $this;
     }
@@ -52,6 +55,7 @@ trait RegisterInjectionsTrait
     /**
      * @return void
      * @throws InvalidClassProvidedException
+     * @throws PathNotFound
      */
     private function registerPackagesInjections(): void
     {

@@ -4,5 +4,7 @@ namespace Core\Contracts\Boot;
 
 interface ApplicationInterface
 {
-    public function run(): void;
+    public function run(): ApplicationInterface;
+
+    public function build(): ApplicationInterface;
 }

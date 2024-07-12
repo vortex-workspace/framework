@@ -20,21 +20,19 @@ final class ApplicationBuilder implements ApplicationBuilderInterface
 
     private array $setting_files;
 
+    /**
+     * @param string $root_path
+     * @param string|null $framework_path
+     * @throws InvalidClassProvidedException
+     * @throws MissingEnvironmentFileException
+     * @throws PathNotFound
+     */
     public function __construct(
         private readonly string  $root_path,
         private readonly ?string $framework_path = null
     )
     {
-    }
-
-    /**
-     * @return ApplicationBuilder
-     * @throws InvalidClassProvidedException
-     * @throws MissingEnvironmentFileException
-     */
-    public function build(): ApplicationBuilder
-    {
-        return $this->defineApplicationBasePaths()
+        $this->defineApplicationBasePaths()
             ->loadEnvironment()
             ->registerApplicationSettingFiles()
             ->registerServices()
@@ -43,7 +41,7 @@ final class ApplicationBuilder implements ApplicationBuilderInterface
 
     public function createApp(): ApplicationInterface
     {
-        return Application::getInstance();
+        return Application::getInstance($this);
     }
 
     /**
@@ -70,7 +68,7 @@ final class ApplicationBuilder implements ApplicationBuilderInterface
                 key_as_path: true,
                 return_full_path: true
             );
-        } catch (PathNotFound $exception) {
+        } catch (PathNotFound) {
             $setting_files = [];
         }
 

@@ -3,13 +3,10 @@
 namespace Stellar\Boot;
 
 use Core\Contracts\Boot\ApplicationInterface;
-use Core\Contracts\GatewayInterface;
-use Dotenv\Dotenv;
-use Dotenv\Exception\InvalidPathException;
+use Core\Contracts\RequestInterface;
+use Core\Contracts\RouteInterface;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
-use League\Flysystem\Local\LocalFilesystemAdapter;
-use Stellar\Adapters\RequestAdapter;
 use Stellar\Boot\Application\Exceptions\DuplicatedAdapter;
 use Stellar\Boot\Application\Exceptions\InvalidGateway;
 use Stellar\Boot\Application\Exceptions\InvalidProvider;
@@ -17,18 +14,23 @@ use Stellar\Boot\Application\Exceptions\TryRegisterDuplicatedGatewayMethod;
 use Stellar\Boot\Application\Traits\Providers;
 use Stellar\Facades\Log;
 use Stellar\Gateway\Method;
-use Stellar\Helpers\ArrayTool;
-use Stellar\Navigation\Directory;
-use Stellar\Navigation\Enums\ApplicationPath;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
+use Stellar\Navigation\ProjectPath;
 use Stellar\Request;
 use Stellar\Route\Exceptions\RouteNameAlreadyInUse;
 use Stellar\RouteDriver;
 use Stellar\Router;
 use Stellar\Router\Exceptions\PrefixIsEnabledButNotFound;
+use Stellar\Services\Request\AbstractRequestService;
+use Stellar\Services\Request\RequestService;
+use Stellar\Services\Route\AbstractRouteFinderService;
+use Stellar\Services\Route\AbstractRouteMatchService;
+use Stellar\Services\Route\ControllerRouteMatchService;
+use Stellar\Services\Route\RouteFinderService;
 use Stellar\Setting;
 use Stellar\Settings\Enum\SettingKey;
 use Stellar\Settings\Exceptions\InvalidSettingException;
+use Stellar\Throwable\Exceptions\Generics\MissingRequiredArgumentException;
 
 final class Application implements ApplicationInterface
 {
@@ -40,92 +42,92 @@ final class Application implements ApplicationInterface
     private Filesystem $filesystem;
     private array $adapters = [];
     private array $setting_files = [];
+    private RequestInterface $request;
+    private RouteInterface $route;
 
-    private function __construct()
+    private function __construct(private readonly ApplicationBuilder $applicationBuilder)
     {
     }
 
-    public static function getInstance(): Application
+    /**
+     * @param ApplicationBuilder|null $applicationBuilder
+     * @return Application
+     * @throws MissingRequiredArgumentException
+     */
+    public static function getInstance(?ApplicationBuilder $applicationBuilder = null): Application
     {
         if (!isset(self::$instance)) {
-            self::$instance = new self();
+            if ($applicationBuilder === null) {
+                throw new MissingRequiredArgumentException('applicationBuilder');
+            }
+
+            self::$instance = new self($applicationBuilder);
         }
 
         return self::$instance;
     }
 
     /**
-     * @return void
+     * @return ApplicationInterface
      * @throws DuplicatedAdapter
      * @throws InvalidGateway
      * @throws InvalidProvider
      * @throws InvalidSettingException
      * @throws PathNotFound
-     * @throws PrefixIsEnabledButNotFound
-     * @throws RouteNameAlreadyInUse
      * @throws TryRegisterDuplicatedGatewayMethod
      */
-    public function run(): void
+    public function build(): ApplicationInterface
     {
-        self::getInstance()
-            ->discoverGateways()
-            ->setErrorHandler()
+        return $this->discoverGateways()
+            ->configureErrorBehavior()
+            ->setRequestInstanceService()
             ->loadProvidersFromPackages()
-            ->loadProviders(Setting::get(SettingKey::APP_PROVIDERS->value, []))
+            ->loadProviders(Setting::get(SettingKey::AppProviders->value, []))
             ->loadApplicationRoutes()
-            ->closeRoutesDoor()
-            ->callRouteDriver();
+            ->closeRoutesDoor();
     }
 
-    public function callRouteDriver(): void
+    public function run(): Application
     {
-        RouteDriver::discover();
+        return $this->discoverCurrentRoute();
     }
 
-    /**
-     * @return Application
-     * @throws TryRegisterDuplicatedGatewayMethod
-     * @throws InvalidGateway
-     * @throws InvalidSettingException
-     */
+    private function setRequestInstanceService(): Application
+    {
+        /** @var AbstractRequestService $request_class */
+        $request_class = $this->applicationBuilder->getService(
+            AbstractRequestService::class,
+            RequestService::class
+        );
+
+        $this->request = $request_class::getInstance(application: $this)->getRequest();
+
+        return $this;
+    }
+
+    public function discoverCurrentRoute(): Application
+    {
+        /** @var AbstractRouteMatchService $route_class */
+        $route_class = $this->applicationBuilder->getService(
+            AbstractRouteMatchService::class,
+            ControllerRouteMatchService::class
+        );
+
+        $this->route = $route_class::getInstance($this->request, $this)->getMatchRoute();
+
+        return $this;
+    }
+
     private function discoverGateways(): Application
     {
-        foreach (Setting::get(SettingKey::APP_GATEWAYS->value, []) as $gateway) {
-            if (!((new $gateway) instanceof GatewayInterface)) {
-                throw new InvalidGateway($gateway);
-            }
-
-            $this->loadGateway($gateway);
-        }
-
-        return $this;
-    }
-
-    private function setRootPaths(string $root_path, ?string $framework_path): Application
-    {
-        define('ROOT_PATH', $root_path);
-
-        if ($framework_path === null) {
-            $framework_path = "$root_path/vendor/vortex-framework";
-        }
-
-        define('FRAMEWORK_PATH', $framework_path);
-
-        $this->filesystem = new Filesystem(new LocalFilesystemAdapter($root_path));
-
-        return $this;
-    }
-
-    /**
-     * @return Application
-     * @throws PathNotFound
-     */
-    private function tryLoadEnvironment(): Application
-    {
-        try {
-            Dotenv::createImmutable(root_path())->load();
-        } catch (InvalidPathException) {
-        }
+        // TODO
+//        foreach (Setting::get(SettingKey::APP_GATEWAYS->value, []) as $gateway) {
+//            if (!((new $gateway) instanceof GatewayInterface)) {
+//                throw new InvalidGateway($gateway);
+//            }
+//
+//            $this->loadGateway($gateway);
+//        }
 
         return $this;
     }
@@ -139,41 +141,15 @@ final class Application implements ApplicationInterface
         return $this->filesystem;
     }
 
-    /**
-     * @return Application
-     * @throws InvalidSettingException
-     * @throws PrefixIsEnabledButNotFound
-     * @throws RouteNameAlreadyInUse
-     * @throws PathNotFound
-     */
     private function loadApplicationRoutes(): Application
     {
-        $route_files = [];
+        /** @var RouteFinderService $route_finder_Service_class */
+        $route_finder_Service_class = $this->applicationBuilder->getService(
+            AbstractRouteFinderService::class,
+            RouteFinderService::class
+        );
 
-        try {
-            $route_files = Directory::scan(root_path(ApplicationPath::Routes->value), exclude_parents: true);
-        } catch (PathNotFound) {
-
-        }
-
-        try {
-            require_once root_path(ApplicationPath::Routes->additionalPath('web.php'));
-        } catch (PathNotFound) {
-        }
-
-        try {
-            require_once root_path(ApplicationPath::Routes->additionalPath('api.php'));
-        } catch (PathNotFound) {
-        }
-
-        foreach (ArrayTool::deleteValue($route_files, ['web.php', 'api.php']) as $route_file) {
-            try {
-                require_once root_path(ApplicationPath::Routes->additionalPath($route_file));
-            } catch (PathNotFound) {
-            }
-        }
-
-        Router::getInstance()->updateRoutesWithPrefix()->loadNames();
+        $route_finder_Service_class::getInstance($this->request, $this)->findRoutes();
 
         return $this;
     }
@@ -186,15 +162,6 @@ final class Application implements ApplicationInterface
     private function closeRoutesDoor(): Application
     {
         Router::getInstance()->disableEntrance();
-
-        return $this;
-    }
-
-    private function setOSSeparator(): Application
-    {
-        if (!defined('OS_SEPARATOR')) {
-            define('OS_SEPARATOR', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? '\\' : '/');
-        }
 
         return $this;
     }
@@ -228,15 +195,14 @@ final class Application implements ApplicationInterface
      * @throws InvalidSettingException
      * @throws PathNotFound
      */
-    private function setErrorHandler(): Application
+    private function configureErrorBehavior(): Application
     {
-        $error_settings = Setting::get('error');
+        $error_settings = Setting::get(SettingKey::Error->value, []);
 
         ini_set('log_errors', $error_settings['log'] ?? true);
-        ini_set('error_log', Log::getFilename(root_path() . '/storage/logs', Setting::get('logs', [])));
-        error_reporting($error_settings['reporting'] ?? E_ALL);
+        ini_set('error_log', Log::getFilename(ProjectPath::logsPath(), Setting::get(SettingKey::Log->value, [])));
         ini_set('display_errors', $error_settings['display'] ?? true);
-
+        error_reporting($error_settings['reporting'] ?? E_ALL);
 
         return $this;
     }
