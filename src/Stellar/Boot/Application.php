@@ -16,11 +16,7 @@ use Stellar\Facades\Log;
 use Stellar\Gateway\Method;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
 use Stellar\Navigation\ProjectPath;
-use Stellar\Request;
-use Stellar\Route\Exceptions\RouteNameAlreadyInUse;
-use Stellar\RouteDriver;
 use Stellar\Router;
-use Stellar\Router\Exceptions\PrefixIsEnabledButNotFound;
 use Stellar\Services\Request\AbstractRequestService;
 use Stellar\Services\Request\RequestService;
 use Stellar\Services\Route\AbstractRouteFinderService;
@@ -87,9 +83,14 @@ final class Application implements ApplicationInterface
             ->closeRoutesDoor();
     }
 
-    public function run(): Application
+    public function run()
     {
-        return $this->discoverCurrentRoute();
+        if (!$this->applicationBuilder->is_console) {
+            $this->discoverCurrentRoute();
+            return $this->route->call();
+        }
+
+        return null;
     }
 
     private function setRequestInstanceService(): Application
@@ -188,6 +189,11 @@ final class Application implements ApplicationInterface
     public function getAdapters(): array
     {
         return $this->adapters;
+    }
+
+    public function getRoute(): RouteInterface
+    {
+        return $this->route;
     }
 
     /**

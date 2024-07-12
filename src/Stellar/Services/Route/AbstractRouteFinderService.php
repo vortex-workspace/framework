@@ -2,21 +2,18 @@
 
 namespace Stellar\Services\Route;
 
-use Core\Contracts\Boot\ApplicationInterface;
-use Core\Contracts\RequestInterface;
 use Core\Contracts\RouteInterface;
-use Stellar\AbstractSingletonService;
+use Stellar\Services\AbstractService;
+use Stellar\Services\AbstractService\Traits\SingletonService;
 
-abstract class AbstractRouteFinderService extends AbstractSingletonService
+abstract class AbstractRouteFinderService extends AbstractService
 {
+    use SingletonService;
+
     /**
      * @var RouteInterface[]
      */
     protected array $routes;
 
     abstract public function findRoutes(): void;
-
-    protected function __construct(protected RequestInterface $request, protected ApplicationInterface $application)
-    {
-    }
 }

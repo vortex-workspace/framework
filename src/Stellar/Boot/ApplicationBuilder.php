@@ -23,15 +23,18 @@ final class ApplicationBuilder implements ApplicationBuilderInterface
     /**
      * @param string $root_path
      * @param string|null $framework_path
+     * @param bool $is_console
      * @throws InvalidClassProvidedException
      * @throws MissingEnvironmentFileException
      * @throws PathNotFound
      */
     public function __construct(
         private readonly string  $root_path,
-        private readonly ?string $framework_path = null
+        private readonly ?string $framework_path = null,
+        public readonly bool     $is_console = false
     )
     {
+
         $this->defineApplicationBasePaths()
             ->loadEnvironment()
             ->registerApplicationSettingFiles()
@@ -52,7 +55,6 @@ final class ApplicationBuilder implements ApplicationBuilderInterface
     {
         try {
             Dotenv::createImmutable(ROOT_PATH)->load();
-
             return $this;
         } catch (InvalidPathException) {
             throw new MissingEnvironmentFileException;

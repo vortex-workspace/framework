@@ -5,11 +5,7 @@ use Stellar\Boot\ApplicationBuilder;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-$_SERVER['REQUEST_URI'] = 'api/test';
-$_SERVER['REQUEST_METHOD'] = 'GET';
-
-$applicationBuilder = new ApplicationBuilder(__DIR__, __DIR__);
+$applicationBuilder = new ApplicationBuilder(__DIR__, __DIR__, true);
 $application = $applicationBuilder->createApp();
 $application->build()->run();
-dd($application);
 //ConsoleIgnition::boot();

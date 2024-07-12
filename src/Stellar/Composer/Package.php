@@ -89,7 +89,6 @@ class Package
                 }
             }
         }
-
         File::createFromTemplate(
             'providers.php',
             storage_path() . '/internals/cache/packages',

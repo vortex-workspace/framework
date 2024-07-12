@@ -1,22 +1,25 @@
 <?php
 
-namespace Stellar;
+namespace Stellar\Services\AbstractService\Traits;
 
 use Core\Contracts\Boot\ApplicationInterface;
 use Core\Contracts\RequestInterface;
 use Core\Contracts\ServiceInterface;
+use Stellar\Services\AbstractService;
 
-abstract class AbstractService implements ServiceInterface
+trait SingletonService
 {
-    protected function __construct(protected RequestInterface $request, protected ApplicationInterface $application)
-    {
-    }
+    protected static AbstractService $instance;
 
     public static function getInstance(
         ?RequestInterface     $request = null,
         ?ApplicationInterface $application = null
     ): ServiceInterface
     {
-        return new static($request, $application);
+        if (!isset(self::$instance)) {
+            self::$instance = new static($request, $application);
+        }
+
+        return self::$instance;
     }
 }

@@ -26,7 +26,7 @@ trait PathsDefinitionTrait
 
     private function defineApplicationFrameworkPath(): static
     {
-        define('FRAMEWORK_PATH', $this->framework_path ?? Path::mountPath([ROOT_PATH, 'vendor', 'vortex-framework']));
+        define('FRAMEWORK_PATH', ($this->framework_path ?? Path::mountPath([ROOT_PATH, 'vendor', 'vortex-framework'])));
 
         return $this;
     }

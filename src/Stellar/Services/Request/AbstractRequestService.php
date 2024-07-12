@@ -5,7 +5,7 @@ namespace Stellar\Services\Request;
 use Core\Contracts\Boot\ApplicationInterface;
 use Core\Contracts\RequestInterface;
 use Core\Contracts\ServiceInterface;
-use Stellar\AbstractService;
+use Stellar\Services\AbstractService;
 
 abstract class AbstractRequestService extends AbstractService
 {
