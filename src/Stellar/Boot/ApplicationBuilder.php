@@ -3,6 +3,7 @@
 namespace Stellar\Boot;
 
 use Core\Contracts\Boot\ApplicationBuilderInterface;
+use Core\Contracts\Boot\ApplicationInterface;
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
 use Stellar\Boot\ApplicationBuilder\Exceptions\MissingEnvironmentFileException;
@@ -10,7 +11,6 @@ use Stellar\Boot\ApplicationBuilder\Traits\PathsDefinitionTrait;
 use Stellar\Boot\ApplicationBuilder\Traits\RegisterInjectionsTrait;
 use Stellar\Boot\ApplicationBuilder\Traits\RegisterServicesTrait;
 use Stellar\Navigation\Directory;
-use Stellar\Navigation\File\Exceptions\FailedOnGetFileContent;
 use Stellar\Navigation\Path\Exceptions\PathNotFound;
 use Stellar\Throwable\Exceptions\Generics\InvalidClassProvidedException;
 
@@ -20,31 +20,31 @@ final class ApplicationBuilder implements ApplicationBuilderInterface
 
     private array $setting_files;
 
+    /**
+     * @param string $root_path
+     * @param string|null $framework_path
+     * @param bool $is_console
+     * @throws InvalidClassProvidedException
+     * @throws MissingEnvironmentFileException
+     * @throws PathNotFound
+     */
     public function __construct(
         private readonly string  $root_path,
-        private readonly ?string $framework_path = null
+        private readonly ?string $framework_path = null,
+        public readonly bool     $is_console = false
     )
     {
-    }
 
-    /**
-     * @return ApplicationBuilder
-     * @throws MissingEnvironmentFileException
-     * @throws FailedOnGetFileContent
-     * @throws InvalidClassProvidedException
-     */
-    public function build(): ApplicationBuilder
-    {
-        return $this->defineApplicationBasePaths()
+        $this->defineApplicationBasePaths()
             ->loadEnvironment()
             ->registerApplicationSettingFiles()
             ->registerServices()
             ->registerInjections();
     }
 
-    public function createApp()
+    public function createApp(): ApplicationInterface
     {
-
+        return Application::getInstance($this);
     }
 
     /**
@@ -55,7 +55,6 @@ final class ApplicationBuilder implements ApplicationBuilderInterface
     {
         try {
             Dotenv::createImmutable(ROOT_PATH)->load();
-
             return $this;
         } catch (InvalidPathException) {
             throw new MissingEnvironmentFileException;
@@ -71,7 +70,7 @@ final class ApplicationBuilder implements ApplicationBuilderInterface
                 key_as_path: true,
                 return_full_path: true
             );
-        } catch (PathNotFound $exception) {
+        } catch (PathNotFound) {
             $setting_files = [];
         }
 

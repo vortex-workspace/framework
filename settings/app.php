@@ -1,13 +1,11 @@
 <?php
 
-use Stellar\Languages\Enum\Language;
-
 return [
     /**
      * Set the default application language
      * 'default_language' => Stellar\Core\Languages\Enum\Languages|string
      */
-    'default_language' => Language::ENGLISH_UNITED_STATES,
+    'default_language' => \Stellar\Languages\Enum\Language::ENGLISH_UNITED_STATES,
 
     /**
      * Set default application date and date time formats
@@ -20,6 +18,7 @@ return [
         \Stellar\Providers\VortexCore::class,
         \Stellar\Storage\StorageProvider::class,
     ],
+    'default_request_class' => \Stellar\Request::class,
     /**
      * List all Gateways that need overwrite in application
      */
@@ -29,7 +28,8 @@ return [
      * Warning: Some services are required, if any be provided, the default services will be used.
      */
     'services' => [
-        \Stellar\Services\AbstractRouteService::class => \Stellar\Services\ControllerRouteService::class
+        \Stellar\Services\Route\ControllerRouteMatchService::class,
+        \Stellar\Services\Route\RouteFinderService::class,
     ],
     'injections' => [
 

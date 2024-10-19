@@ -19,19 +19,19 @@ abstract class Exception extends PhpException
     )
     {
         parent::__construct($message, $code->value, $previous);
-
-        $exception_settings = Setting::get('exceptions', []);
-
-        if ($this->logIsEnable($exception_settings) && $this->levelLogIsEnable($exception_settings, $level)) {
-            Log::{strtolower($level->name)}(json_encode([
-                'message' => $message,
-                'trace' => $this->getTraceAsString(),
-                'file' => $this->getFile(),
-                'line' => $this->getLine(),
-                'code' => $this->getCode(),
-                'previous' => $this->getPrevious(),
-            ]));
-        }
+//dd($message);
+//        $exception_settings = Setting::get('exceptions', []);
+//
+//        if ($this->logIsEnable($exception_settings) && $this->levelLogIsEnable($exception_settings, $level)) {
+//            Log::{strtolower($level->name)}(json_encode([
+//                'message' => $message,
+//                'trace' => $this->getTraceAsString(),
+//                'file' => $this->getFile(),
+//                'line' => $this->getLine(),
+//                'code' => $this->getCode(),
+//                'previous' => $this->getPrevious(),
+//            ]));
+//        }
     }
 
     private function logIsEnable(array $exception_settings): bool

@@ -37,9 +37,10 @@ trait Providers
             $this->loadProviderSettings($provider);
             $provider::routes();
             $this->appendCommands($provider::commands());
+            //TODO
             $this->createProviderAdapters($provider);
             $this->loadProviderGateways($provider);
-            $this->bootProvider(new RequestAdapter(), new $provider);
+            $this->bootProvider($this->request, new $provider);
         }
 
         return $this;
