@@ -6,6 +6,7 @@ use Closure;
 use Core\Contracts\AdapterInterface;
 use Stellar\Adapter\Exceptions\MethodNotFound;
 use Stellar\Boot\Application;
+use Stellar\Throwable\Exceptions\Generics\MissingRequiredArgumentException;
 
 abstract class Adapter implements AdapterInterface
 {
@@ -17,6 +18,7 @@ abstract class Adapter implements AdapterInterface
      * @param array $arguments
      * @return mixed
      * @throws MethodNotFound
+     * @throws MissingRequiredArgumentException
      */
     public static function __callStatic(string $name, array $arguments)
     {

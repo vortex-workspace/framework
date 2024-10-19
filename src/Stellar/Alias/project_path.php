@@ -52,3 +52,13 @@ function public_path(?string $additional_path = null): string
 {
     return ProjectPath::publicPath($additional_path);
 }
+
+/**
+ * @param string|null $additional_path
+ * @return string
+ * @throws PathNotFound
+ */
+function logs_path(?string $additional_path = null): string
+{
+    return ProjectPath::logsPath($additional_path);
+}

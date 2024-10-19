@@ -36,7 +36,7 @@ class StrTool
     {
         if (!isset(self::$inflector)) {
             return self::$inflector = InflectorFactory::createForLanguage(
-                Setting::get(SettingKey::INTERNALS_LANGUAGES_INFLECTOR->getFullTrace(), Language::ENGLISH)->value
+                Setting::get(SettingKey::InternalLanguagesInflector->getFullTrace(), Language::ENGLISH)->value
             )->build();
         }
 
@@ -47,7 +47,7 @@ class StrTool
     {
         if (!isset(self::$faker)) {
             return self::$faker = new Faker($locale ??
-                Setting::get(SettingKey::INTERNALS_LANGUAGES_FAKER->getFullTrace(), Locale::ENGLISH_US));
+                Setting::get(SettingKey::InternalLanguagesFaker->getFullTrace(), Locale::ENGLISH_US));
         }
 
         return self::$faker;

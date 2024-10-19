@@ -46,7 +46,7 @@ class DateRule extends Rule
      */
     #[Override] public function applyRule(Request $request): void
     {
-        $this->format = $this->format ?? Setting::get('app.' . SettingKey::APP_DEFAULT_DATE_FORMAT->value);
+        $this->format = $this->format ?? Setting::get('app.' . SettingKey::AppDefaultDateFormat->value);
 
         try {
             $date = Carbon::createFromFormat($this->format, $this->value);
