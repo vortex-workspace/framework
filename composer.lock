@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9895438246c0a21ced8a994a0d3a1926",
+    "content-hash": "8a096323b87aaffe25a650c58d74e7d3",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -3289,16 +3289,16 @@
         },
         {
             "name": "vortex-workspace/cosmo",
-            "version": "dev-feature/COS-2-implement-prompt-helpers",
+            "version": "0.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vortex-workspace/cosmo.git",
-                "reference": "bb96b6ab0f665d4735f92ac2f49ccc34782c6667"
+                "reference": "a058f8f4cdf0c7a1789d3f97bde0516fd5bdd18c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vortex-workspace/cosmo/zipball/bb96b6ab0f665d4735f92ac2f49ccc34782c6667",
-                "reference": "bb96b6ab0f665d4735f92ac2f49ccc34782c6667",
+                "url": "https://api.github.com/repos/vortex-workspace/cosmo/zipball/a058f8f4cdf0c7a1789d3f97bde0516fd5bdd18c",
+                "reference": "a058f8f4cdf0c7a1789d3f97bde0516fd5bdd18c",
                 "shasum": ""
             },
             "require": {
@@ -3340,9 +3340,9 @@
             ],
             "support": {
                 "issues": "https://github.com/vortex-workspace/cosmo/issues",
-                "source": "https://github.com/vortex-workspace/cosmo/tree/feature/COS-2-implement-prompt-helpers"
+                "source": "https://github.com/vortex-workspace/cosmo/tree/0.0.2"
             },
-            "time": "2024-05-22T02:33:09+00:00"
+            "time": "2024-10-22T02:11:45+00:00"
         }
     ],
     "packages-dev": [
@@ -6264,9 +6264,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "vortex-workspace/cosmo": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
