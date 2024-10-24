@@ -8,4 +8,4 @@ require_once __DIR__ . '/vendor/autoload.php';
 $applicationBuilder = new ApplicationBuilder(__DIR__, __DIR__, true);
 $application = $applicationBuilder->createApp();
 $application->build()->run();
-//ConsoleIgnition::boot();
+ConsoleIgnition::boot();

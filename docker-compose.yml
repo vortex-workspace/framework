@@ -6,8 +6,6 @@ networks:
 volumes:
   mariadb:
     driver: ${VOLUMES_DRIVER}
-  adminer:
-    driver: ${VOLUMES_DRIVER}
 services:
   ### Workspace Utilities ##################################
   workspace:
